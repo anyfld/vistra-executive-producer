@@ -33,7 +33,6 @@ describe("Home", () => {
       </ThemeProvider>
     )
 
-    // MUI Gridアイテムがレンダリングされているか確認
     const gridItems = container.querySelectorAll(".MuiGrid-root")
     expect(gridItems.length).toBeGreaterThan(0)
   })

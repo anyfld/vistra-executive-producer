@@ -18,32 +18,32 @@ Vite + React + TypeScript プロジェクト
 
 ```bash
 # 依存関係インストール
-npm install
+pnpm install
 
 # 開発サーバー起動 (http://localhost:3000)
-npm run dev
+pnpm run dev
 
 # ビルド
-npm run build
+pnpm run build
 
 # プレビュー
-npm run preview
+pnpm run preview
 ```
 
 ## コード品質
 
 ```bash
 # Lint
-npm run lint
-npm run lint:fix
+pnpm run lint
+pnpm run lint:fix
 
 # フォーマット
-npm run format
-npm run format:check
+pnpm run format
+pnpm run format:check
 
 # テスト
-npm run test
-npm run test:ui
+pnpm run test
+pnpm run test:ui
 ```
 
 ## ディレクトリ構成
