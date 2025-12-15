@@ -1,4 +1,4 @@
-name: CI
+name: Main CI
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   lint:
-    name: lint
+    name: all-status-check / lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
         run: pnpm run lint
 
   format-check:
-    name: format check
+    name: all-status-check / format check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
         run: pnpm run format:check
 
   type-check:
-    name: type check
+    name: all-status-check / type check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
         run: pnpm exec tsc -b --pretty false
 
   test:
-    name: test
+    name: all-status-check / test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -79,7 +79,7 @@ jobs:
         run: pnpm run test
 
   build:
-    name: build
+    name: all-status-check / build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -102,7 +102,7 @@ jobs:
           retention-days: 7
 
   all-status-check:
-    name: All Status Check
+    name: all-status-check
     runs-on: ubuntu-latest
     needs:
       - lint
