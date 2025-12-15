@@ -7,7 +7,8 @@ on:
       - synchronize
       - reopened
 permissions:
-  pull-requests: read
+  contents: read          # アクションの実行に必要なリポジトリ参照権限
+  pull-requests: write    # ステータス更新・コメント投稿に必要
 jobs:
   pr-title:
     name: Validate PR title
