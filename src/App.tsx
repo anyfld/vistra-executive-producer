@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom"
 import { Box, Container } from "@mui/material"
 
 import Home from "@/routes/Home"
-import HashPage from "@/routes/$hash"
+import CameraPage from "@/routes/$name"
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <Container component="main" sx={{ flex: 1, py: 4 }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/:hash" element={<HashPage />} />
+          <Route path="/:hash" element={<CameraPage />} />
         </Routes>
       </Container>
     </Box>

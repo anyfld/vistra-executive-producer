@@ -8,26 +8,14 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew"
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"
 import ZoomInIcon from "@mui/icons-material/ZoomIn"
 import ZoomOutIcon from "@mui/icons-material/ZoomOut"
-import { sampleCameras, type Mode } from "./sampleCameras"
+import type { Mode } from "@/types/camera"
 import { theme } from "@/theme"
+import WebRTCPlayer from "@/components/WebRTCPlayer"
 
-export default function HashPage() {
-  const { hash } = useParams<{ hash: string }>()
+export default function CameraPage() {
+  const { name } = useParams<{ name: string }>()
   const navigate = useNavigate()
-
-  // hashから該当するcameraを検索
-  const camera = sampleCameras.find((cam) => cam.hash === hash)
-  const [mode, setMode] = useState<Mode>(camera?.mode ?? "Autonomous")
-
-  if (!camera) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6" color="error">
-          Camera not found for hash: {hash}
-        </Typography>
-      </Box>
-    )
-  }
+  const [mode, setMode] = useState<Mode>("Autonomous")
 
   const handleChangeMode = () => {
     setMode((prevMode: Mode) => {
@@ -118,7 +106,7 @@ export default function HashPage() {
         {/* 左上: IDとMode */}
         <Box>
           <Typography variant="h6" component="div">
-            ID: {String(camera.id).padStart(4, "0")}
+            Camera: {name}
           </Typography>
           <Typography variant="h6" component="div">
             Mode: {mode}
@@ -157,22 +145,7 @@ export default function HashPage() {
             overflow: "hidden",
           }}
         >
-          {camera.thumbnail ? (
-            <Box
-              component="img"
-              src={camera.thumbnail}
-              alt={`Camera ${camera.id} video`}
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              Video Stream
-            </Typography>
-          )}
+          <WebRTCPlayer name={name ?? "camera"} />
         </Paper>
 
         {/* 右側: 十字キー、UP/DOWNボタンが並んだコントローラー */}

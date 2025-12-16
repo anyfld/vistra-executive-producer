@@ -4,61 +4,61 @@ import { describe, it, expect, vi } from "vitest"
 import { useParams, useNavigate } from "react-router-dom"
 
 import { theme } from "@/theme"
-import HashPage from "./$hash"
-import { sampleCameras } from "./sampleCameras"
+import CameraPage from "./$name"
 
 vi.mock("react-router-dom", () => ({
   useParams: vi.fn(),
   useNavigate: vi.fn(),
 }))
 
+vi.mock("@/components/WebRTCPlayer", () => ({
+  default: ({ name }: { name: string }) => <div data-testid="webrtc-player">{name}</div>,
+}))
+
 const mockedUseParams = useParams as unknown as {
-  mockReturnValue: (value: { hash?: string }) => void
+  mockReturnValue: (value: { name?: string }) => void
 }
 
 const mockedUseNavigate = useNavigate as unknown as {
   mockReturnValue: (value: (path: string) => void) => void
 }
 
-describe("HashPage", () => {
-  it("renders error message when camera is not found", () => {
-    const invalidHash = "invalid-hash"
-    mockedUseParams.mockReturnValue({ hash: invalidHash })
+describe("DetailPage", () => {
+  it("renders camera name from route parameter", () => {
+    const cameraName = "camera-1"
+    mockedUseParams.mockReturnValue({ name: cameraName })
 
     render(
       <ThemeProvider theme={theme}>
-        <HashPage />
+        <CameraPage />
       </ThemeProvider>
     )
 
-    expect(
-      screen.getByText(new RegExp(`Camera not found for hash: ${invalidHash}`, "i"))
-    ).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(`Camera: ${cameraName}`, "i"))).toBeInTheDocument()
   })
 
-  it("renders camera information when camera is found", () => {
-    const targetCamera = sampleCameras[0]
-    mockedUseParams.mockReturnValue({ hash: targetCamera.hash })
+  it("renders WebRTC player with camera name", () => {
+    const cameraName = "camera-2"
+    mockedUseParams.mockReturnValue({ name: cameraName })
 
     render(
       <ThemeProvider theme={theme}>
-        <HashPage />
+        <CameraPage />
       </ThemeProvider>
     )
 
-    expect(
-      screen.getByText(new RegExp(`ID: ${String(targetCamera.id).padStart(4, "0")}`, "i"))
-    ).toBeInTheDocument()
-    expect(screen.getByText(new RegExp(`Mode: ${targetCamera.mode}`, "i"))).toBeInTheDocument()
+    const player = screen.getByTestId("webrtc-player")
+    expect(player).toBeInTheDocument()
+    expect(player).toHaveTextContent(cameraName)
   })
 
   it("toggles mode when Change Mode button is clicked", () => {
-    const targetCamera = { ...sampleCameras[0], mode: "Autonomous" as const }
-    mockedUseParams.mockReturnValue({ hash: targetCamera.hash })
+    const cameraName = "camera-3"
+    mockedUseParams.mockReturnValue({ name: cameraName })
 
     render(
       <ThemeProvider theme={theme}>
-        <HashPage />
+        <CameraPage />
       </ThemeProvider>
     )
 
@@ -77,15 +77,15 @@ describe("HashPage", () => {
   })
 
   it("navigates back to home when back button is clicked", () => {
-    const targetCamera = sampleCameras[1]
+    const cameraName = "camera-4"
     const navigateMock = vi.fn()
 
-    mockedUseParams.mockReturnValue({ hash: targetCamera.hash })
+    mockedUseParams.mockReturnValue({ name: cameraName })
     mockedUseNavigate.mockReturnValue(navigateMock)
 
     render(
       <ThemeProvider theme={theme}>
-        <HashPage />
+        <CameraPage />
       </ThemeProvider>
     )
 
@@ -94,20 +94,5 @@ describe("HashPage", () => {
     fireEvent.click(buttons[0])
 
     expect(navigateMock).toHaveBeenCalledWith("/")
-  })
-
-  it("renders camera thumbnail image when available", () => {
-    const targetCamera = sampleCameras[2]
-    mockedUseParams.mockReturnValue({ hash: targetCamera.hash })
-
-    render(
-      <ThemeProvider theme={theme}>
-        <HashPage />
-      </ThemeProvider>
-    )
-
-    const image = screen.getByAltText(`Camera ${targetCamera.id} video`) as HTMLImageElement
-    expect(image).toBeInTheDocument()
-    expect(image.src).toBe(targetCamera.thumbnail)
   })
 })
