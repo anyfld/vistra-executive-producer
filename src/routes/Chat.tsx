@@ -32,11 +32,15 @@ export function ChatContent() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
   const handleSubmit = async () => {
     const trimmed = input.trim()
     if (!trimmed || isLoading) return
+
+    // 新しい送信ごとに前回のエラー表示をリセット
+    setError(null)
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -53,14 +57,14 @@ export function ChatContent() {
     // const response = await fetch("/api/chat", { ... })
     // const data = await response.json()
     // const assistantText = data.message
-    const simulateRequest = () =>
-      new Promise<string>((resolve) => {
-        window.setTimeout(() => {
-          resolve(createMockAssistantReply(trimmed))
-        }, 800)
-      })
-
     try {
+      const simulateRequest = () =>
+        new Promise<string>((resolve) => {
+          window.setTimeout(() => {
+            resolve(createMockAssistantReply(trimmed))
+          }, 800)
+        })
+
       const assistantText = await simulateRequest()
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -68,6 +72,11 @@ export function ChatContent() {
         content: assistantText,
       }
       setMessages((prev) => [...prev, assistantMessage])
+      // 正常終了時はエラーをクリア（将来のAPI実装で部分的成功などを考慮）
+      setError(null)
+    } catch {
+      // 実際の運用ではロギング基盤などに送る想定
+      setError("アシスタントからの応答取得中にエラーが発生しました。しばらく待ってから再度お試しください。")
     } finally {
       setIsLoading(false)
     }
@@ -190,6 +199,16 @@ export function ChatContent() {
         }}
         aria-label="メッセージ入力フォーム"
       >
+        {error && (
+          <Typography
+            variant="body2"
+            color="error"
+            role="alert"
+            sx={{ mb: 1 }}
+          >
+            {error}
+          </Typography>
+        )}
         <TextField
           fullWidth
           multiline
@@ -199,8 +218,7 @@ export function ChatContent() {
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={(event) => {
-            const nativeEvent = event.nativeEvent as KeyboardEvent
-            const isComposing = nativeEvent.isComposing === true
+            const isComposing = event.nativeEvent.isComposing
 
             if (event.key === "Enter" && !event.shiftKey && !isComposing) {
               event.preventDefault()
