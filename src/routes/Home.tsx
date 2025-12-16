@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Box, Typography, Paper, Avatar } from "@mui/material"
 import VideocamIcon from "@mui/icons-material/Videocam"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
@@ -9,16 +10,23 @@ import { theme } from "@/theme"
 // カメラカードコンポーネント
 function CameraCard({ camera }: { camera: Camera }) {
   const [hasError, setHasError] = useState(false)
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    navigate(`/${camera.hash}`)
+  }
 
   return (
     <Paper
       elevation={2}
+      onClick={handleClick}
       sx={{
         p: 2,
         height: "100%",
         display: "flex",
         flexDirection: "column",
         transition: "transform 0.2s, box-shadow 0.2s",
+        cursor: "pointer",
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: 4,

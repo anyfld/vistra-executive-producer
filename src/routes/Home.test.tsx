@@ -1,10 +1,20 @@
 import { render, screen, fireEvent } from "@testing-library/react"
 import { ThemeProvider } from "@mui/material/styles"
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 
 import { theme } from "@/theme"
 import Home from "./Home"
 import { sampleCameras } from "./sampleCameras"
+
+const mockedNavigate = vi.fn()
+
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mockedNavigate,
+}))
+
+beforeEach(() => {
+  mockedNavigate.mockClear()
+})
 
 describe("Home", () => {
   it("renders correctly", () => {
@@ -121,5 +131,20 @@ describe("Home", () => {
     // 複数のアバターが表示されていることを確認
     const avatars = container.querySelectorAll(".MuiAvatar-root")
     expect(avatars.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it("navigates to camera detail page when a camera card is clicked", () => {
+    render(
+      <ThemeProvider theme={theme}>
+        <Home />
+      </ThemeProvider>
+    )
+
+    const targetCamera = sampleCameras[0]
+
+    const idElement = screen.getByText(new RegExp(`ID: ${targetCamera.id}`, "i"))
+    fireEvent.click(idElement)
+
+    expect(mockedNavigate).toHaveBeenCalledWith(`/${targetCamera.hash}`)
   })
 })
