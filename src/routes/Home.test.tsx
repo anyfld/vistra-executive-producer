@@ -45,14 +45,14 @@ describe("Home", () => {
 
     // 最初のカメラの情報が表示されているか確認
     expect(screen.getByText(/ID: 1/i)).toBeInTheDocument()
-    
+
     // 複数のカメラカードがあるため、getAllByTextを使用
     const typeLabels = screen.getAllByText(/Type:/i)
     expect(typeLabels.length).toBe(8)
-    
+
     const modeLabels = screen.getAllByText(/Mode:/i)
     expect(modeLabels.length).toBe(8)
-    
+
     const connectionLabels = screen.getAllByText(/Connection:/i)
     expect(connectionLabels.length).toBe(8)
   })

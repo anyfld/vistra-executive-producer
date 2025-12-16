@@ -38,7 +38,7 @@ const sampleCameras: Camera[] = [
     thumbnail: "https://via.placeholder.com/400x300/FF9800/FFFFFF?text=PTZ+3",
     type: "PTZ",
     mode: "LightWeight",
-    connection: "Unreachable",  
+    connection: "Unreachable",
     hash: "1234567890",
   },
   {
