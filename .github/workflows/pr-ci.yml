@@ -31,3 +31,20 @@ jobs:
           fi
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
+
+  validate-pull-request:
+    name: validate-pull-request
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - pr-title
+      - pr-body
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check validate-pull-request
+        run: |
+          diff \
+            <(yq ".jobs | del(.validate-pull-request) | keys.[]" .github/workflows/pr-ci.yml) \
+            <(yq ".jobs.validate-pull-request.needs.[]" .github/workflows/pr-ci.yml)
+      - name: All PR checks passed
+        run: echo "All PR validation checks passed"
