@@ -78,4 +78,3 @@ export const sampleCameras: Camera[] = [
     hash: "1234567890",
   },
 ]
-
