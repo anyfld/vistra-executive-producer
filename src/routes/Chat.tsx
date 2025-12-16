@@ -76,7 +76,9 @@ export function ChatContent() {
       setError(null)
     } catch {
       // 実際の運用ではロギング基盤などに送る想定
-      setError("アシスタントからの応答取得中にエラーが発生しました。しばらく待ってから再度お試しください。")
+      setError(
+        "アシスタントからの応答取得中にエラーが発生しました。しばらく待ってから再度お試しください。"
+      )
     } finally {
       setIsLoading(false)
     }
@@ -200,12 +202,7 @@ export function ChatContent() {
         aria-label="メッセージ入力フォーム"
       >
         {error && (
-          <Typography
-            variant="body2"
-            color="error"
-            role="alert"
-            sx={{ mb: 1 }}
-          >
+          <Typography variant="body2" color="error" role="alert" sx={{ mb: 1 }}>
             {error}
           </Typography>
         )}
