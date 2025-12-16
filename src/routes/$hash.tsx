@@ -48,7 +48,6 @@ export default function HashPage() {
     packetLoss: string
     videoFrame: string
   }[] = [
-    /*
     {
       label: "EP <-> MD",
       latency: "10ms",
@@ -77,7 +76,13 @@ export default function HashPage() {
       packetLoss: "0%",
       videoFrame: "60fps",
     },
-    */
+    {
+      label: "EP <-> MD",
+      latency: "10ms",
+      jitter: "5ms",
+      packetLoss: "0%",
+      videoFrame: "60fps",
+    },
   ]
 
   return (
