@@ -5,7 +5,7 @@ import ChatIcon from "@mui/icons-material/Chat"
 import CloseIcon from "@mui/icons-material/Close"
 
 import Home from "@/routes/Home"
-import HashPage from "@/routes/$hash"
+import HashPage from "@/routes/$name"
 import Chat from "@/routes/Chat"
 import { ChatContent } from "@/routes/Chat"
 import CameraPage from "@/routes/$name"
@@ -55,7 +55,6 @@ function App() {
       <Dialog
         open={chatOpen}
         onClose={handleChatClose}
-        maxWidth="sm"
         fullScreen={isMobile}
         sx={{
           // デスクトップではダイアログを画面右寄りに配置
@@ -65,6 +64,7 @@ function App() {
         }}
         PaperProps={{
           sx: {
+            width: isMobile ? "100%" : 480,
             height: isMobile ? "100%" : "80vh",
             maxHeight: isMobile ? "100%" : "80vh",
             m: isMobile ? 0 : 2,
