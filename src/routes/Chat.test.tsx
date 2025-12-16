@@ -19,7 +19,7 @@ describe("Chat", () => {
     expect(screen.getByRole("heading", { name: "LLM チャット" })).toBeInTheDocument()
     expect(
       screen.getByText(
-        /まだメッセージはありません。右下の入力欄から最初のメッセージを送信してみてください。/i
+        /まだメッセージはありません。下部の入力欄から最初のメッセージを送信してみてください。/i
       )
     ).toBeInTheDocument()
 

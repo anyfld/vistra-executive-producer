@@ -33,8 +33,7 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
+  const handleSubmit = async () => {
     const trimmed = input.trim()
     if (!trimmed || isLoading) return
 
@@ -131,7 +130,7 @@ export default function Chat() {
           <Stack spacing={1.5}>
             {messages.length === 0 && (
               <Typography variant="body2" color="text.secondary">
-                まだメッセージはありません。右下の入力欄から最初のメッセージを送信してみてください。
+                まだメッセージはありません。下部の入力欄から最初のメッセージを送信してみてください。
               </Typography>
             )}
             {messages.map((message) => (
@@ -188,7 +187,10 @@ export default function Chat() {
 
         <Box
           component="form"
-          onSubmit={handleSubmit}
+          onSubmit={(event: FormEvent<HTMLFormElement>) => {
+            event.preventDefault()
+            void handleSubmit()
+          }}
           sx={{
             px: 2,
             py: 1.5,
@@ -212,7 +214,7 @@ export default function Chat() {
 
               if (event.key === "Enter" && !event.shiftKey && !isComposing) {
                 event.preventDefault()
-                void handleSubmit(event as never)
+                void handleSubmit()
               }
             }}
             InputProps={{
