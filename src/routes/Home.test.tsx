@@ -4,12 +4,40 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 import { theme } from "@/theme"
 import Home from "./Home"
-import { sampleCameras } from "./sampleCameras"
+
+const mockCameras = [
+  {
+    name: "camera-1",
+    type: "PTZ" as const,
+    mode: "Autonomous" as const,
+    connection: "Reachable" as const,
+  },
+  {
+    name: "camera-2",
+    type: "Arm" as const,
+    mode: "LightWeight" as const,
+    connection: "Reachable" as const,
+  },
+  {
+    name: "camera-3",
+    type: "PTZ" as const,
+    mode: "Autonomous" as const,
+    connection: "Unreachable" as const,
+  },
+]
 
 const mockedNavigate = vi.fn()
 
 vi.mock("react-router-dom", () => ({
   useNavigate: () => mockedNavigate,
+}))
+
+vi.mock("@/lib/streams", () => ({
+  getStreams: vi.fn(() => Promise.resolve(mockCameras)),
+}))
+
+vi.mock("@/components/WebRTCPlayer", () => ({
+  default: ({ name }: { name: string }) => <div data-testid={`webrtc-${name}`}>{name}</div>,
 }))
 
 beforeEach(() => {
@@ -35,116 +63,74 @@ describe("Home", () => {
     expect(screen.getByRole("heading", { name: /Camera Dashboard/i })).toBeInTheDocument()
   })
 
-  it("renders camera cards", () => {
+  it("renders camera cards", async () => {
     const { container } = render(
       <ThemeProvider theme={theme}>
         <Home />
       </ThemeProvider>
     )
 
-    // Paperコンポーネント（カメラカード）がsampleCameras.lengthと一致することを確認
+    // Wait for first camera to load
+    await screen.findByText(/Name: camera-1/i)
+
+    // Paperコンポーネント（カメラカード）がmockCameras.lengthと一致することを確認
     const cameraCards = container.querySelectorAll(".MuiPaper-root")
-    expect(cameraCards.length).toBe(sampleCameras.length)
+    expect(cameraCards.length).toBe(mockCameras.length)
   })
 
-  it("renders camera information for each card", () => {
+  it("renders camera information for each card", async () => {
     render(
       <ThemeProvider theme={theme}>
         <Home />
       </ThemeProvider>
     )
 
+    // Wait for cameras to load
+    await screen.findByText(/Name: camera-1/i)
+
     // 最初のカメラの情報が表示されているか確認
-    expect(screen.getByText(new RegExp(`ID: ${sampleCameras[0].id}`, "i"))).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(`Name: ${mockCameras[0].name}`, "i"))).toBeInTheDocument()
 
     // 複数のカメラカードがあるため、getAllByTextを使用
     const typeLabels = screen.getAllByText(/Type:/i)
-    expect(typeLabels.length).toBe(sampleCameras.length)
+    expect(typeLabels.length).toBe(mockCameras.length)
 
     const modeLabels = screen.getAllByText(/Mode:/i)
-    expect(modeLabels.length).toBe(sampleCameras.length)
+    expect(modeLabels.length).toBe(mockCameras.length)
 
     const connectionLabels = screen.getAllByText(/Connection:/i)
-    expect(connectionLabels.length).toBe(sampleCameras.length)
+    expect(connectionLabels.length).toBe(mockCameras.length)
   })
 
-  it("renders all camera IDs", () => {
+  it("renders all camera names", async () => {
     render(
       <ThemeProvider theme={theme}>
         <Home />
       </ThemeProvider>
     )
 
-    // sampleCamerasの各カメラIDがすべて表示されているか確認
-    sampleCameras.forEach((camera) => {
-      expect(screen.getByText(new RegExp(`ID: ${camera.id}`, "i"))).toBeInTheDocument()
-    })
+    // Wait for cameras to load and check all are displayed
+    for (const camera of mockCameras) {
+      await screen.findByText(new RegExp(`Name: ${camera.name}`, "i"))
+    }
   })
 
-  it("displays fallback avatar when thumbnail image fails to load", () => {
-    const { container } = render(
-      <ThemeProvider theme={theme}>
-        <Home />
-      </ThemeProvider>
-    )
-
-    // 最初のカメラの画像要素を取得（alt属性で特定）
-    const firstCameraImage = screen.getByAltText(`Camera ${sampleCameras[0].id} thumbnail`)
-    expect(firstCameraImage).toBeInTheDocument()
-
-    // 画像の読み込みエラーをシミュレート
-    fireEvent.error(firstCameraImage)
-
-    // エラー後、画像が消えてフォールバックアバターが表示されることを確認
-    // 画像要素が存在しないことを確認
-    expect(screen.queryByAltText(`Camera ${sampleCameras[0].id} thumbnail`)).not.toBeInTheDocument()
-
-    // Avatarコンポーネントが表示されていることを確認（MuiAvatar-rootクラスで検証）
-    const avatars = container.querySelectorAll(".MuiAvatar-root")
-    expect(avatars.length).toBeGreaterThan(0)
-  })
-
-  it("handles image error for multiple camera cards independently", () => {
-    const { container } = render(
-      <ThemeProvider theme={theme}>
-        <Home />
-      </ThemeProvider>
-    )
-
-    // 最初の2つのカメラの画像要素を取得
-    const firstImage = screen.getByAltText(`Camera ${sampleCameras[0].id} thumbnail`)
-    const secondImage = screen.getByAltText(`Camera ${sampleCameras[1].id} thumbnail`)
-
-    // 最初の画像のエラーをシミュレート
-    fireEvent.error(firstImage)
-
-    // 最初の画像は消え、2つ目の画像はまだ表示されていることを確認
-    expect(screen.queryByAltText(`Camera ${sampleCameras[0].id} thumbnail`)).not.toBeInTheDocument()
-    expect(screen.getByAltText(`Camera ${sampleCameras[1].id} thumbnail`)).toBeInTheDocument()
-
-    // 2つ目の画像のエラーもシミュレート
-    fireEvent.error(secondImage)
-
-    // 2つ目の画像も消えることを確認
-    expect(screen.queryByAltText(`Camera ${sampleCameras[1].id} thumbnail`)).not.toBeInTheDocument()
-
-    // 複数のアバターが表示されていることを確認
-    const avatars = container.querySelectorAll(".MuiAvatar-root")
-    expect(avatars.length).toBeGreaterThanOrEqual(2)
-  })
-
-  it("navigates to camera detail page when a camera card is clicked", () => {
+  it("navigates to camera detail page when a camera card is clicked", async () => {
     render(
       <ThemeProvider theme={theme}>
         <Home />
       </ThemeProvider>
     )
 
-    const targetCamera = sampleCameras[0]
+    const targetCamera = mockCameras[0]
 
-    const idElement = screen.getByText(new RegExp(`ID: ${targetCamera.id}`, "i"))
-    fireEvent.click(idElement)
+    const nameElement = await screen.findByText(new RegExp(`Name: ${targetCamera.name}`, "i"))
+    const cardElement = nameElement.closest(".MuiPaper-root")
 
-    expect(mockedNavigate).toHaveBeenCalledWith(`/${targetCamera.hash}`)
+    if (cardElement) {
+      fireEvent.click(cardElement)
+    }
+
+    expect(mockedNavigate).toHaveBeenCalledWith(`/${targetCamera.name}`)
   })
 })

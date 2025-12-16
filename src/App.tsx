@@ -8,6 +8,7 @@ import Home from "@/routes/Home"
 import HashPage from "@/routes/$hash"
 import Chat from "@/routes/Chat"
 import { ChatContent } from "@/routes/Chat"
+import CameraPage from "@/routes/$name"
 
 function App() {
   const [chatOpen, setChatOpen] = useState(false)
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/:hash" element={<HashPage />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/:name" element={<CameraPage />} />
         </Routes>
       </Container>
 

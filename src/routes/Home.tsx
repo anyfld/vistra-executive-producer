@@ -1,19 +1,19 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Box, Typography, Paper, Avatar } from "@mui/material"
-import VideocamIcon from "@mui/icons-material/Videocam"
+import { Box, Typography, Paper, CircularProgress, Alert } from "@mui/material"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import ErrorIcon from "@mui/icons-material/Error"
-import { sampleCameras, type Camera } from "./sampleCameras"
+import type { Camera } from "@/types/camera"
 import { theme } from "@/theme"
+import { getStreams } from "@/lib/streams"
+import WebRTCPlayer from "@/components/WebRTCPlayer"
 
 // カメラカードコンポーネント
 function CameraCard({ camera }: { camera: Camera }) {
-  const [hasError, setHasError] = useState(false)
   const navigate = useNavigate()
 
   const handleClick = () => {
-    navigate(`/${camera.hash}`)
+    navigate(`/${camera.name}`)
   }
 
   return (
@@ -44,29 +44,13 @@ function CameraCard({ camera }: { camera: Camera }) {
           backgroundColor: theme.palette.grey[100],
         }}
       >
-        {camera.thumbnail && !hasError ? (
-          <Box
-            component="img"
-            src={camera.thumbnail}
-            alt={`Camera ${camera.id} thumbnail`}
-            onError={() => setHasError(true)}
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        ) : (
-          <Avatar sx={{ bgcolor: "rgba(0, 0, 0, 0.26)", width: 64, height: 64 }}>
-            <VideocamIcon sx={{ fontSize: 40 }} />
-          </Avatar>
-        )}
+        <WebRTCPlayer name={camera.name} />
       </Box>
 
       {/* カメラ情報 */}
       <Box sx={{ flexGrow: 1 }}>
         <Typography variant="h6" component="div" gutterBottom>
-          ID: {camera.id}
+          Name: {camera.name}
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -117,11 +101,49 @@ function CameraCard({ camera }: { camera: Camera }) {
 }
 
 export default function Home() {
+  const [cameras, setCameras] = useState<Camera[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadStreams = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const streams = await getStreams()
+        setCameras(streams)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load streams")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadStreams()
+  }, [])
+
   return (
     <Box sx={{ width: "100%", minHeight: "100vh", p: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3 }}>
         Camera Dashboard
       </Typography>
+
+      {isLoading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {!isLoading && !error && cameras.length === 0 && (
+        <Alert severity="info">No streams available</Alert>
+      )}
+
       <Box
         sx={{
           display: "grid",
@@ -132,8 +154,8 @@ export default function Home() {
           gap: 3,
         }}
       >
-        {sampleCameras.map((camera) => (
-          <CameraCard key={camera.id} camera={camera} />
+        {cameras.map((camera) => (
+          <CameraCard key={camera.name} camera={camera} />
         ))}
       </Box>
     </Box>

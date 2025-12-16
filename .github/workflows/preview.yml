@@ -1,0 +1,51 @@
+name: Preview
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  preview-deploy:
+    name: Preview Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: preview
+    outputs:
+      url: ${{ steps.page.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shiron-dev/actions/setup-node@9e2029b6bf55740748a5eace94dc93d97a1496ba # v1.5.2
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run build
+        run: pnpm run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3
+        id: page
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ./dist --project-name=vistra-executive-producer
+      - name: Comment on PR
+        uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2.8.2
+        if: github.event_name == 'pull_request'
+        with:
+          message-id: cloudflare-deploy
+          message: |
+            ### 🚀 Preview Deploy
+
+            |  Name | Link |
+            |---------------------------------|------------------------|
+            |<span aria-hidden="true">🔨</span> Latest commit | ${{ github.sha }} |
+            |<span aria-hidden="true">😎</span> Deploy Preview URL | [${{ steps.page.outputs.deployment-url }}](${{ steps.page.outputs.deployment-url }}) |
+            ---
+
