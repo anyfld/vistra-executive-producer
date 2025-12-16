@@ -1,5 +1,5 @@
 type CameraType = "PTZ" | "Arm"
-type Mode = "Autonomous" | "LightWeight"
+export type Mode = "Autonomous" | "LightWeight"
 type Connection = "Reachable" | "Unreachable"
 
 export interface Camera {
@@ -19,7 +19,7 @@ export const sampleCameras: Camera[] = [
     type: "PTZ",
     mode: "Autonomous",
     connection: "Reachable",
-    hash: "1234567890",
+    hash: "a9f3c27b10",
   },
   {
     id: 2,
@@ -27,7 +27,7 @@ export const sampleCameras: Camera[] = [
     type: "Arm",
     mode: "LightWeight",
     connection: "Reachable",
-    hash: "1234567890",
+    hash: "4d82e1f9c3",
   },
   {
     id: 3,
@@ -35,7 +35,7 @@ export const sampleCameras: Camera[] = [
     type: "PTZ",
     mode: "LightWeight",
     connection: "Unreachable",
-    hash: "1234567890",
+    hash: "7b16a0e5d2",
   },
   {
     id: 4,
@@ -43,7 +43,7 @@ export const sampleCameras: Camera[] = [
     type: "Arm",
     mode: "Autonomous",
     connection: "Reachable",
-    hash: "1234567890",
+    hash: "f5c93a7d21",
   },
   {
     id: 5,
@@ -51,7 +51,7 @@ export const sampleCameras: Camera[] = [
     type: "PTZ",
     mode: "Autonomous",
     connection: "Reachable",
-    hash: "1234567890",
+    hash: "3e9b74c1d8",
   },
   {
     id: 6,
@@ -59,7 +59,7 @@ export const sampleCameras: Camera[] = [
     type: "Arm",
     mode: "LightWeight",
     connection: "Unreachable",
-    hash: "1234567890",
+    hash: "c1d27f8a94",
   },
   {
     id: 7,
@@ -67,7 +67,7 @@ export const sampleCameras: Camera[] = [
     type: "PTZ",
     mode: "LightWeight",
     connection: "Reachable",
-    hash: "1234567890",
+    hash: "9a4c5e2b71",
   },
   {
     id: 8,
@@ -75,6 +75,6 @@ export const sampleCameras: Camera[] = [
     type: "Arm",
     mode: "Autonomous",
     connection: "Unreachable",
-    hash: "1234567890",
+    hash: "6f0d3b8e52",
   },
 ]

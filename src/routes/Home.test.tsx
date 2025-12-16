@@ -1,10 +1,16 @@
 import { render, screen, fireEvent } from "@testing-library/react"
 import { ThemeProvider } from "@mui/material/styles"
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 
 import { theme } from "@/theme"
 import Home from "./Home"
 import { sampleCameras } from "./sampleCameras"
+
+const mockedNavigate = vi.fn()
+
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mockedNavigate,
+}))
 
 describe("Home", () => {
   it("renders correctly", () => {
