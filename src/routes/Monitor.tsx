@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
-import { Box, Typography, CircularProgress, Alert, Paper } from "@mui/material"
+import { useNavigate } from "react-router-dom"
+import { Box, Typography, CircularProgress, Alert, Paper, Button } from "@mui/material"
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 
 import type { Camera } from "@/types/camera"
 import { getStreams } from "@/lib/streams"
@@ -9,6 +11,7 @@ export default function Monitor() {
   const [cameras, setCameras] = useState<Camera[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const loadStreams = async () => {
@@ -47,6 +50,10 @@ export default function Monitor() {
     return 4
   })()
 
+  const handleBackToHome = () => {
+    navigate("/")
+  }
+
   return (
     <Box
       sx={{
@@ -59,6 +66,27 @@ export default function Monitor() {
         gap: 2,
       }}
     >
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 1,
+        }}
+      >
+        <Button
+          variant="outlined"
+          color="inherit"
+          startIcon={<ArrowBackIcon />}
+          onClick={handleBackToHome}
+        >
+          Back to Dashboard
+        </Button>
+        <Typography variant="h5" component="h1">
+          Monitor View
+        </Typography>
+      </Box>
       {isLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />

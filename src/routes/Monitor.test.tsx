@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
 import { ThemeProvider } from "@mui/material/styles"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
@@ -38,9 +39,11 @@ describe("Monitor", () => {
 
   const renderWithTheme = () =>
     render(
-      <ThemeProvider theme={theme}>
-        <Monitor />
-      </ThemeProvider>
+      <MemoryRouter>
+        <ThemeProvider theme={theme}>
+          <Monitor />
+        </ThemeProvider>
+      </MemoryRouter>
     )
 
   it("初期表示でストリーム読み込み中のローディングインジケーターが表示される", () => {

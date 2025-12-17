@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Box, Typography, Paper, CircularProgress, Alert } from "@mui/material"
+import { Box, Typography, Paper, CircularProgress, Alert, Button } from "@mui/material"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import ErrorIcon from "@mui/icons-material/Error"
+import GridViewIcon from "@mui/icons-material/GridView"
 import type { Camera } from "@/types/camera"
 import { theme } from "@/theme"
 import { getStreams } from "@/lib/streams"
@@ -107,6 +108,11 @@ export default function Home() {
   const [cameras, setCameras] = useState<Camera[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
+
+  const handleGoToMonitor = () => {
+    navigate("/monitor")
+  }
 
   useEffect(() => {
     const loadStreams = async () => {
@@ -127,9 +133,28 @@ export default function Home() {
 
   return (
     <Box sx={{ width: "100%", minHeight: "100vh", p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3 }}>
-        Camera Dashboard
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 3,
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+      >
+        <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 0 }}>
+          Camera Dashboard
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<GridViewIcon />}
+          onClick={handleGoToMonitor}
+        >
+          Monitor View
+        </Button>
+      </Box>
 
       {isLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
