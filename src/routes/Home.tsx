@@ -10,6 +10,7 @@ import WebRTCPlayer from "@/components/WebRTCPlayer"
 
 // カメラカードコンポーネント
 function CameraCard({ camera }: { camera: Camera }) {
+  const [isHovered, setIsHovered] = useState(false)
   const navigate = useNavigate()
 
   const handleClick = () => {
@@ -27,10 +28,8 @@ function CameraCard({ camera }: { camera: Camera }) {
         flexDirection: "column",
         transition: "transform 0.2s, box-shadow 0.2s",
         cursor: "pointer",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: 4,
-        },
+        transform: isHovered ? "translateY(-4px)" : "none",
+        boxShadow: isHovered ? 4 : undefined,
       }}
     >
       {/* サムネイル */}
@@ -48,7 +47,11 @@ function CameraCard({ camera }: { camera: Camera }) {
       </Box>
 
       {/* カメラ情報 */}
-      <Box sx={{ flexGrow: 1 }}>
+      <Box
+        sx={{ flexGrow: 1 }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Typography variant="h6" component="div" gutterBottom>
           Name: {camera.name}
         </Typography>
