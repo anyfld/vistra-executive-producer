@@ -24,19 +24,28 @@ export default function Monitor() {
       }
     }
 
-    void loadStreams()
+    loadStreams()
   }, [])
 
-  const columnCount =
-    cameras.length <= 1
-      ? 1
-      : cameras.length === 2
-        ? 2
-        : cameras.length <= 4
-          ? 2
-          : cameras.length <= 9
-            ? 3
-            : 4
+  const columnCount = (() => {
+    if (cameras.length <= 1) {
+      return 1
+    }
+
+    if (cameras.length === 2) {
+      return 2
+    }
+
+    if (cameras.length <= 4) {
+      return 2
+    }
+
+    if (cameras.length <= 9) {
+      return 3
+    }
+
+    return 4
+  })()
 
   return (
     <Box

@@ -43,7 +43,7 @@ describe("Monitor", () => {
       </ThemeProvider>
     )
 
-  it("初期表示でストリーム読み込み中のローディングインジケーターが表示される", async () => {
+  it("初期表示でストリーム読み込み中のローディングインジケーターが表示される", () => {
     mockGetStreams.mockResolvedValueOnce([])
 
     renderWithTheme()
@@ -76,9 +76,10 @@ describe("Monitor", () => {
     for (const camera of mockCameras) {
       expect(await screen.findByTestId(`webrtc-${camera.name}`)).toBeInTheDocument()
       expect(screen.getByLabelText(new RegExp(`Camera ${camera.name}`, "i"))).toBeInTheDocument()
+      expect(screen.getByText(camera.connection)).toBeInTheDocument()
     }
 
     const cameraCards = container.querySelectorAll(".MuiPaper-root")
-    expect(cameraCards.length).toBeGreaterThanOrEqual(mockCameras.length)
+    expect(cameraCards.length).toBe(mockCameras.length)
   })
 })
