@@ -52,25 +52,25 @@ importers:
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
       '@bufbuild/buf':
-        specifier: ^1.61.0
+        specifier: 1.61.0
         version: 1.61.0
       '@bufbuild/protoc-gen-es':
-        specifier: ^2.10.2
+        specifier: 2.10.2
         version: 2.10.2(@bufbuild/protobuf@2.10.2)
       '@connectrpc/protoc-gen-connect-query':
-        specifier: ^2.2.0
+        specifier: 2.2.0
         version: 2.2.0(@bufbuild/protoc-gen-es@2.10.2(@bufbuild/protobuf@2.10.2))
       '@eslint/js':
         specifier: ^9.39.1
         version: 9.39.2
       '@testing-library/jest-dom':
-        specifier: ^6.9.1
+        specifier: 6.9.1
         version: 6.9.1
       '@testing-library/react':
-        specifier: ^16.3.0
+        specifier: 16.3.0
         version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@types/node':
-        specifier: ^24.10.1
+        specifier: 24.10.4
         version: 24.10.4
       '@types/react':
         specifier: ^19.2.5
@@ -79,13 +79,13 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
       '@vitejs/plugin-react':
-        specifier: ^5.1.1
+        specifier: 5.1.2
         version: 5.1.2(vite@7.2.7(@types/node@24.10.4))
       '@vitest/coverage-v8':
         specifier: 4.0.15
         version: 4.0.15(vitest@4.0.15)
       '@vitest/ui':
-        specifier: ^4.0.15
+        specifier: 4.0.15
         version: 4.0.15(vitest@4.0.15)
       eslint:
         specifier: ^9.39.1
@@ -100,25 +100,25 @@ importers:
         specifier: ^0.4.24
         version: 0.4.25(eslint@9.39.2)
       globals:
-        specifier: ^16.5.0
+        specifier: 16.5.0
         version: 16.5.0
       jsdom:
-        specifier: ^27.3.0
+        specifier: 27.3.0
         version: 27.3.0(postcss@8.5.6)
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
       typescript:
-        specifier: ~5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       typescript-eslint:
         specifier: ^8.46.4
         version: 8.49.0(eslint@9.39.2)(typescript@5.9.3)
       vite:
-        specifier: ^7.2.4
+        specifier: 7.2.7
         version: 7.2.7(@types/node@24.10.4)
       vitest:
-        specifier: ^4.0.15
+        specifier: 4.0.15
         version: 4.0.15(@types/node@24.10.4)(@vitest/ui@4.0.15)(jsdom@27.3.0(postcss@8.5.6))
 
 packages:
@@ -1282,6 +1282,7 @@ packages:
 
   eslint-plugin-react-refresh@0.4.25:
     resolution: {integrity: sha512-dRUD2LOdEqI4zXHqbQ442blQAzdSuShAaiSq5Vtyy6LT08YUf0oOjBDo4VPx0dCPgiPWh1WB4dtbLOd0kOlDPQ==}
+    deprecated: This version introduced false positive. This was reverted in 0.4.26
     peerDependencies:
       eslint: '>=8.40'
 
