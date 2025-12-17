@@ -1,18 +1,21 @@
 import { useState } from "react"
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, useLocation } from "react-router-dom"
 import { Box, Container, Fab, Dialog, IconButton, useTheme, useMediaQuery } from "@mui/material"
 import ChatIcon from "@mui/icons-material/Chat"
 import CloseIcon from "@mui/icons-material/Close"
 
 import Home from "@/routes/Home"
 import CameraPage from "@/routes/$name"
-import Chat from "@/routes/Chat"
-import { ChatContent } from "@/routes/Chat"
+import Chat, { ChatContent } from "@/routes/Chat"
+import Monitor from "@/routes/Monitor"
 
 function App() {
   const [chatOpen, setChatOpen] = useState(false)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+  const location = useLocation()
+
+  const isMonitorRoute = location.pathname.startsWith("/monitor")
 
   // iframe内で実行されているかどうかを判定
   const isInIframe = typeof window !== "undefined" && window.self !== window.top
@@ -27,11 +30,17 @@ function App() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      <Container component="main" sx={{ flex: 1 }}>
+      <Container
+        component="main"
+        sx={{ flex: 1, p: isMonitorRoute ? 1 : undefined }}
+        maxWidth={isMonitorRoute ? false : "lg"}
+        disableGutters={isMonitorRoute}
+      >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/:name" element={<CameraPage />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/monitor" element={<Monitor />} />
         </Routes>
       </Container>
 
