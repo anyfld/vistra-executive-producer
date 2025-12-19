@@ -203,11 +203,6 @@ export default function Monitor() {
                 overflow: "hidden",
                 borderRadius: 2,
                 border: `1px solid ${alpha("#fff", 0.08)}`,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  borderColor: alpha(colors.primary.main, 0.4),
-                  boxShadow: `0 0 24px ${alpha(colors.primary.main, 0.15)}`,
-                },
               }}
             >
               <Box

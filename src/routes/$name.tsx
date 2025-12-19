@@ -131,14 +131,7 @@ function ControlButton({
 export default function CameraPage() {
   const { name } = useParams<{ name: string }>()
   const navigate = useNavigate()
-  const [mode, setMode] = useState<Mode>("Autonomous")
-
-  const handleChangeMode = () => {
-    setMode((prevMode: Mode) => {
-      const nextMode = prevMode === "Autonomous" ? "LightWeight" : "Autonomous"
-      return nextMode
-    })
-  }
+  const [mode] = useState<Mode>("Autonomous")
 
   const handleBack = () => {
     navigate("/")
@@ -255,11 +248,6 @@ export default function CameraPage() {
             }}
           />
         </Box>
-
-        {/* モード変更ボタン */}
-        <Button variant="contained" onClick={handleChangeMode} sx={{ px: 3 }}>
-          Change Mode
-        </Button>
       </Box>
 
       {/* メインコンテンツ */}

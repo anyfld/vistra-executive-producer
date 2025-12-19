@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type FormEvent } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Box,
   Paper,
@@ -7,12 +8,14 @@ import {
   IconButton,
   CircularProgress,
   Stack,
+  Button,
   alpha,
 } from "@mui/material"
 import SendIcon from "@mui/icons-material/Send"
 import SmartToyIcon from "@mui/icons-material/SmartToy"
 import PersonIcon from "@mui/icons-material/Person"
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { colors } from "@/theme"
 
 export type Role = "user" | "assistant"
@@ -349,20 +352,63 @@ export function ChatContent() {
 
 // ページ表示用のコンポーネント（後方互換性のため）
 export default function Chat() {
+  const navigate = useNavigate()
+
+  const handleBackToHome = () => {
+    navigate("/")
+  }
+
   return (
     <Box
       sx={{
         width: "100%",
         minHeight: "100vh",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         py: { xs: 2, md: 4 },
         px: { xs: 1, md: 2 },
         background: `radial-gradient(ellipse at top, ${alpha(colors.primary.main, 0.05)} 0%, transparent 50%)`,
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 960, maxHeight: "calc(100vh - 64px)" }}>
-        <ChatContent />
+      {/* ヘッダー */}
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 960,
+          mx: "auto",
+          mb: 2,
+        }}
+      >
+        <Button
+          variant="outlined"
+          color="primary"
+          size="large"
+          startIcon={<ArrowBackIcon />}
+          onClick={handleBackToHome}
+          sx={{
+            borderWidth: 2,
+            px: 3,
+            py: 1,
+            "&:hover": {
+              borderWidth: 2,
+            },
+          }}
+        >
+          Back to Dashboard
+        </Button>
+      </Box>
+
+      {/* チャットコンテンツ */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Box sx={{ width: "100%", maxWidth: 960, maxHeight: "calc(100vh - 140px)" }}>
+          <ChatContent />
+        </Box>
       </Box>
     </Box>
   )

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
+import { render, screen, fireEvent } from "@testing-library/react"
 import { ThemeProvider } from "@mui/material/styles"
 import { describe, it, expect, vi } from "vitest"
 import { useParams, useNavigate } from "react-router-dom"
@@ -54,7 +54,7 @@ describe("DetailPage", () => {
     expect(player).toHaveTextContent(cameraName)
   })
 
-  it("toggles mode when Change Mode button is clicked", async () => {
+  it("displays mode chip with Autonomous mode", () => {
     const cameraName = "camera-3"
     mockedUseParams.mockReturnValue({ name: cameraName })
 
@@ -64,22 +64,8 @@ describe("DetailPage", () => {
       </ThemeProvider>
     )
 
-    // 初期モード
+    // モードチップが表示されていることを確認
     expect(screen.getByText("Autonomous")).toBeInTheDocument()
-
-    const changeModeButton = screen.getByRole("button", { name: /Change Mode/i })
-
-    // 1回目のクリックで LightWeight に切り替わる
-    fireEvent.click(changeModeButton)
-    await waitFor(() => {
-      expect(screen.getByText("LightWeight")).toBeInTheDocument()
-    })
-
-    // 2回目のクリックで Autonomous に戻る
-    fireEvent.click(changeModeButton)
-    await waitFor(() => {
-      expect(screen.getByText("Autonomous")).toBeInTheDocument()
-    })
   })
 
   it("navigates back to home when back button is clicked", () => {

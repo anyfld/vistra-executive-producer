@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { ThemeProvider } from "@mui/material/styles"
+import { MemoryRouter } from "react-router-dom"
 import { describe, it, expect } from "vitest"
 
 import { theme } from "@/theme"
@@ -8,9 +9,11 @@ import Chat from "./Chat"
 describe("Chat", () => {
   const renderWithTheme = () =>
     render(
-      <ThemeProvider theme={theme}>
-        <Chat />
-      </ThemeProvider>
+      <MemoryRouter>
+        <ThemeProvider theme={theme}>
+          <Chat />
+        </ThemeProvider>
+      </MemoryRouter>
     )
 
   it("初期表示でヘッダーと空状態メッセージが表示される", () => {

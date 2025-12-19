@@ -16,6 +16,7 @@ function App() {
   const location = useLocation()
 
   const isMonitorRoute = location.pathname.startsWith("/monitor")
+  const isChatRoute = location.pathname === "/chat"
 
   // iframe内で実行されているかどうかを判定
   const isInIframe = typeof window !== "undefined" && window.self !== window.top
@@ -45,7 +46,7 @@ function App() {
       </Container>
 
       {/* iframe内でない場合のみチャットアイコンとダイアログを表示 */}
-      {!isInIframe && (
+      {!isInIframe && !isChatRoute && (
         <>
           {/* 右下に固定されたチャットアイコン */}
           <Fab
@@ -78,6 +79,7 @@ function App() {
             }}
             PaperProps={{
               sx: {
+                width: isMobile ? "100%" : 420,
                 height: isMobile ? "100%" : "80vh",
                 maxHeight: isMobile ? "100%" : "80vh",
                 m: isMobile ? 0 : 2,

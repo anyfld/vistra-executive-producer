@@ -99,7 +99,10 @@ function CameraCard({ camera }: { camera: Camera }) {
           overflow: "hidden",
         }}
       >
-        <WebRTCPlayer name={camera.name} />
+        {/* WebRTCPlayer - ポインターイベントを無効化してカードクリックを優先 */}
+        <Box sx={{ pointerEvents: "none" }}>
+          <WebRTCPlayer name={camera.name} />
+        </Box>
 
         {/* オーバーレイ */}
         <Box
@@ -136,6 +139,7 @@ function CameraCard({ camera }: { camera: Camera }) {
             border: `1px solid ${isOnline ? alpha(colors.success.main, 0.4) : alpha(colors.error.main, 0.4)}`,
             fontWeight: 600,
             fontSize: "0.7rem",
+            pointerEvents: "none",
             "& .MuiChip-icon": {
               color: "inherit",
             },
@@ -149,6 +153,7 @@ function CameraCard({ camera }: { camera: Camera }) {
             bottom: 12,
             left: 12,
             right: 12,
+            pointerEvents: "none",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
