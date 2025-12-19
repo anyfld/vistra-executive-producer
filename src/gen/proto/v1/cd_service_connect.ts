@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { GetCameraCapabilitiesRequest, GetCameraCapabilitiesResponse, GetCameraRequest, GetCameraResponse, HeartbeatRequest, HeartbeatResponse, ListCamerasRequest, ListCamerasResponse, RegisterCameraRequest, RegisterCameraResponse, StreamConnectionStatusRequest, StreamConnectionStatusResponse, SwitchCameraModeRequest, SwitchCameraModeResponse, UnregisterCameraRequest, UnregisterCameraResponse, UpdateCameraRequest, UpdateCameraResponse } from "./cd_service_pb.js";
+import { GetCameraRequest, GetCameraResponse, ListCamerasRequest, ListCamerasResponse, RegisterCameraRequest, RegisterCameraResponse, StreamConnectionStatusRequest, StreamConnectionStatusResponse, SwitchCameraModeRequest, SwitchCameraModeResponse, UnregisterCameraRequest, UnregisterCameraResponse, UpdateCameraRequest, UpdateCameraResponse } from "./cd_service_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -73,17 +73,8 @@ export const CameraService = {
       kind: MethodKind.Unary,
     },
     /**
-     * 接続状態監視
+     * 接続状態監視 (ストリーム上の状態更新に基づく)
      *
-     * @generated from rpc v1.CameraService.Heartbeat
-     */
-    heartbeat: {
-      name: "Heartbeat",
-      I: HeartbeatRequest,
-      O: HeartbeatResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
      * @generated from rpc v1.CameraService.StreamConnectionStatus
      */
     streamConnectionStatus: {
@@ -91,17 +82,6 @@ export const CameraService = {
       I: StreamConnectionStatusRequest,
       O: StreamConnectionStatusResponse,
       kind: MethodKind.ServerStreaming,
-    },
-    /**
-     * カメラ能力取得
-     *
-     * @generated from rpc v1.CameraService.GetCameraCapabilities
-     */
-    getCameraCapabilities: {
-      name: "GetCameraCapabilities",
-      I: GetCameraCapabilitiesRequest,
-      O: GetCameraCapabilitiesResponse,
-      kind: MethodKind.Unary,
     },
   }
 } as const;

@@ -39,17 +39,3 @@ export const listCameras = CameraService.method.listCameras;
  * @generated from rpc v1.CameraService.SwitchCameraMode
  */
 export const switchCameraMode = CameraService.method.switchCameraMode;
-
-/**
- * 接続状態監視
- *
- * @generated from rpc v1.CameraService.Heartbeat
- */
-export const heartbeat = CameraService.method.heartbeat;
-
-/**
- * カメラ能力取得
- *
- * @generated from rpc v1.CameraService.GetCameraCapabilities
- */
-export const getCameraCapabilities = CameraService.method.getCameraCapabilities;
