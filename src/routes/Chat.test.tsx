@@ -69,9 +69,7 @@ describe("Chat", () => {
     // 少し待ってから、メッセージバブルがまだ表示されていないことを確認
     await new Promise((resolve) => setTimeout(resolve, 200))
     // 空状態メッセージがまだ表示されていることを確認（メッセージが送信されていない）
-    expect(
-      screen.getByText(/まだメッセージはありません。/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/まだメッセージはありません。/i)).toBeInTheDocument()
 
     // Enter 単体で送信される
     fireEvent.keyDown(input, { key: "Enter", code: "Enter" })
