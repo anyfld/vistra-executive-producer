@@ -4,8 +4,11 @@ import { describe, it, vi } from "vitest"
 
 import App from "./App"
 
-vi.mock("@/lib/streams", () => ({
-  getStreams: vi.fn(() => Promise.resolve([])),
+vi.mock("@connectrpc/connect-query", () => ({
+  useQuery: vi.fn(() => ({ data: { cameras: [] }, isLoading: false, error: null })),
+}))
+vi.mock("@/lib/cameraMapper", () => ({
+  mapProtoCameras: vi.fn(() => []),
 }))
 
 describe("App", () => {

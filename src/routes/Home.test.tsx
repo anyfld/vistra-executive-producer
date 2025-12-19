@@ -32,8 +32,12 @@ vi.mock("react-router-dom", () => ({
   useNavigate: () => mockedNavigate,
 }))
 
-vi.mock("@/lib/streams", () => ({
-  getStreams: vi.fn(() => Promise.resolve(mockCameras)),
+vi.mock("@connectrpc/connect-query", () => ({
+  useQuery: vi.fn(),
+}))
+
+vi.mock("@/lib/cameraMapper", () => ({
+  mapProtoCameras: vi.fn(),
 }))
 
 vi.mock("@/components/WebRTCPlayer", () => ({
@@ -45,7 +49,13 @@ beforeEach(() => {
 })
 
 describe("Home", () => {
-  it("renders correctly", () => {
+  it("renders correctly", async () => {
+    // mock useQuery to return ready data and mapProtoCameras to return mock cameras
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+    ;(useQuery as any).mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null })
+    ;(mapProtoCameras as any).mockReturnValue(mockCameras)
+
     render(
       <ThemeProvider theme={theme}>
         <Home />
@@ -64,6 +74,11 @@ describe("Home", () => {
   })
 
   it("renders camera cards", async () => {
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+    ;(useQuery as any).mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null })
+    ;(mapProtoCameras as any).mockReturnValue(mockCameras)
+
     const { container } = render(
       <ThemeProvider theme={theme}>
         <Home />
@@ -90,6 +105,11 @@ describe("Home", () => {
   })
 
   it("renders camera information for each card", async () => {
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+    ;(useQuery as any).mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null })
+    ;(mapProtoCameras as any).mockReturnValue(mockCameras)
+
     render(
       <ThemeProvider theme={theme}>
         <Home />
@@ -119,6 +139,11 @@ describe("Home", () => {
   })
 
   it("renders all camera names", async () => {
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+    ;(useQuery as any).mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null })
+    ;(mapProtoCameras as any).mockReturnValue(mockCameras)
+
     render(
       <ThemeProvider theme={theme}>
         <Home />
@@ -138,6 +163,11 @@ describe("Home", () => {
   })
 
   it("navigates to camera detail page when a camera card is clicked", async () => {
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+    ;(useQuery as any).mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null })
+    ;(mapProtoCameras as any).mockReturnValue(mockCameras)
+
     render(
       <ThemeProvider theme={theme}>
         <Home />

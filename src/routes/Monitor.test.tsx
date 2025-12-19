@@ -4,8 +4,15 @@ import { ThemeProvider } from "@mui/material/styles"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 import { theme } from "@/theme"
-import { getStreams } from "@/lib/streams"
 import Monitor from "./Monitor"
+
+vi.mock("@connectrpc/connect-query", () => ({
+  useQuery: vi.fn(),
+}))
+
+vi.mock("@/lib/cameraMapper", () => ({
+  mapProtoCameras: vi.fn(),
+}))
 
 const mockCameras = [
   {
@@ -22,19 +29,13 @@ const mockCameras = [
   },
 ]
 
-vi.mock("@/lib/streams", () => ({
-  getStreams: vi.fn(),
-}))
-
 vi.mock("@/components/WebRTCPlayer", () => ({
   default: ({ name }: { name: string }) => <div data-testid={`webrtc-${name}`}>{name}</div>,
 }))
 
-const mockGetStreams = vi.mocked(getStreams)
-
 describe("Monitor", () => {
   beforeEach(() => {
-    mockGetStreams.mockReset()
+    // no-op; individual tests will set useQuery/mapProtoCameras mocks
   })
 
   const renderWithTheme = () =>
@@ -46,8 +47,12 @@ describe("Monitor", () => {
       </MemoryRouter>
     )
 
-  it("初期表示でストリーム読み込み中のローディングインジケーターが表示される", () => {
-    mockGetStreams.mockResolvedValueOnce([])
+  it("初期表示でストリーム読み込み中のローディングインジケーターが表示される", async () => {
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+
+    ;(useQuery as any).mockReturnValue({ data: undefined, isLoading: true, error: null })
+    ;(mapProtoCameras as any).mockReturnValue([])
 
     renderWithTheme()
 
@@ -55,8 +60,12 @@ describe("Monitor", () => {
   })
 
   it("ストリーム取得に失敗した場合にエラーメッセージが表示される", async () => {
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
     const errorMessage = "Failed to load streams"
-    mockGetStreams.mockRejectedValueOnce(new Error(errorMessage))
+
+    ;(useQuery as any).mockReturnValue({ data: undefined, isLoading: false, error: new Error(errorMessage) })
+    ;(mapProtoCameras as any).mockReturnValue([])
 
     renderWithTheme()
 
@@ -64,7 +73,11 @@ describe("Monitor", () => {
   })
 
   it("ストリームが空の場合に情報メッセージが表示される", async () => {
-    mockGetStreams.mockResolvedValueOnce([])
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+
+    ;(useQuery as any).mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null })
+    ;(mapProtoCameras as any).mockReturnValue([])
 
     renderWithTheme()
 
@@ -77,7 +90,11 @@ describe("Monitor", () => {
   })
 
   it("取得したカメラ情報がグリッドに表示される", async () => {
-    mockGetStreams.mockResolvedValueOnce(mockCameras)
+    const { useQuery } = await import("@connectrpc/connect-query")
+    const { mapProtoCameras } = await import("@/lib/cameraMapper")
+
+    ;(useQuery as any).mockReturnValue({ data: { cameras: [{} as any, {} as any] }, isLoading: false, error: null })
+    ;(mapProtoCameras as any).mockReturnValue(mockCameras)
 
     const { container } = renderWithTheme()
 

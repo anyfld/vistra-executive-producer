@@ -152,7 +152,7 @@ export default function Monitor() {
       {/* エラー */}
       {error && (
         <Alert severity="error" sx={{ mx: 1 }}>
-          {error}
+          {error instanceof Error ? error.message : String(error)}
         </Alert>
       )}
 
