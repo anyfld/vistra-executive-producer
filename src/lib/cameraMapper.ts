@@ -27,6 +27,7 @@ export function mapProtoCamera(protoCamera: ProtoCamera): Camera {
     type,
     mode,
     connection,
+    webrtcConnectionName: protoCamera.webrtcConnectionName ?? "",
   }
 }
 

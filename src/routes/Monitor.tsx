@@ -210,7 +210,7 @@ export default function Monitor() {
                     inset: 0,
                   }}
                 >
-                  <WebRTCPlayer name={camera.name} />
+                  <WebRTCPlayer name={camera.webrtcConnectionName || camera.name} />
                 </Box>
 
                 {/* カメラ名オーバーレイ */}

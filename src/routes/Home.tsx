@@ -102,7 +102,7 @@ function CameraCard({ camera }: { camera: Camera }) {
       >
         {/* WebRTCPlayer - ポインターイベントを無効化してカードクリックを優先 */}
         <Box sx={{ pointerEvents: "none" }}>
-          <WebRTCPlayer name={camera.name} />
+          <WebRTCPlayer name={camera.webrtcConnectionName || camera.name} />
         </Box>
 
         {/* オーバーレイ */}

@@ -8,4 +8,6 @@ export type Camera = {
   type: CameraType
   mode: Mode
   connection: Connection
+  // 視聴用WebRTC接続名（空文字の場合あり）
+  webrtcConnectionName?: string
 }

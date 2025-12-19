@@ -15,19 +15,12 @@ import SpeedIcon from "@mui/icons-material/Speed"
 import type { Mode } from "@/types/camera"
 import { colors } from "@/theme"
 import WebRTCPlayer from "@/components/WebRTCPlayer"
+import { FDService } from "@/gen/proto/v1/fd_service_pb"
+import { ControlCommandType } from "@/gen/proto/v1/fd_service_pb"
 import type { PTZParameters } from "@/gen/proto/v1/cinematography_pb"
 import { getCamera } from "@/gen/proto/v1/cd_service-CameraService_connectquery"
 import { listAllCameras } from "@/gen/proto/v1/cr_service-CRService_connectquery"
 import { CameraStatus } from "@/gen/proto/v1/cr_service_pb"
-import { sendPTZCommand } from "@/gen/proto/v1/ptz_service-PTZService_connectquery"
-import { PTZOperationType } from "@/gen/proto/v1/ptz_service_pb"
-import { create } from "@bufbuild/protobuf"
-import {
-  PTZPositionSchema,
-  PTZSpeedSchema,
-  AbsoluteMoveCommandSchema,
-  PTZCommandSchema,
-} from "@/gen/proto/v1/ptz_service_pb"
 
 // メトリクス型
 type MetricData = {
@@ -168,11 +161,15 @@ export default function CameraPage() {
   const navigate = useNavigate()
   const [mode] = useState<Mode>("Autonomous")
 
-  const { mutateAsync: sendPTZCommandMutation, isPending: sending } = useMutation(sendPTZCommand)
+  const { mutateAsync: sendCommand, isPending: sending } = useMutation(
+    FDService.method.streamControlCommands
+  )
 
   const cameraId = cameraIdParam ?? ""
   const { data: cameraData } = useQuery(getCamera, { cameraId }, { enabled: Boolean(cameraId) })
   const cameraName = (cameraData?.camera?.name ?? cameraId) || "camera"
+  const webrtcConnectionName = cameraData?.camera?.webrtcConnectionName || ""
+  const streamName = webrtcConnectionName || cameraName
 
   // CRService の ListAllCameras から STREAMING 状態のカメラを取得し、不一致時に自動修正
   const { data: streamingList } = useQuery(listAllCameras, {
@@ -195,6 +192,8 @@ export default function CameraPage() {
     }
   }, [cameraIdParam, streamingList, navigate])
 
+  const genId = () => globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
+
   // 長押し用のインターバルRef
   const longPressIntervalRef = useRef<number | null>(null)
 
@@ -205,17 +204,7 @@ export default function CameraPage() {
     zoom: 1, // サンプルのデフォルトZoomMinが1.0
   })
 
-  // 角度ベース座標を正規化座標に変換
-  const normalizePTZ = useCallback((pan: number, tilt: number, zoom: number) => {
-    const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
-    // pan: -180~180度 → x: -1.0~1.0
-    const x = clamp(pan / 180, -1.0, 1.0)
-    // tilt: -45~45度 → y: -1.0~1.0
-    const y = clamp(tilt / 45, -1.0, 1.0)
-    // zoom: 1~5倍 → z: 0.0~1.0
-    const z = clamp((zoom - 1) / 4, 0.0, 1.0)
-    return { x, y, z }
-  }, [])
+  const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
 
   // 画面外で指が離れた場合でも確実に停止
   useEffect(() => {
@@ -244,53 +233,29 @@ export default function CameraPage() {
       zoomSpeed: number
     }) => {
       if (!cameraId) return
+      const command = {
+        commandId: genId(),
+        cameraId,
+        type: ControlCommandType.PTZ_ABSOLUTE,
+        ptzParameters: target as unknown as PTZParameters,
+        presetNumber: 0,
+        focusValue: 0,
+        timeoutMs: 5000,
+      }
       ;(async () => {
         try {
-          const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
-          // 角度ベース座標を正規化座標に変換
-          const normalized = normalizePTZ(target.pan, target.tilt, target.zoom)
-
-          // PTZPosition を作成
-          const position = create(PTZPositionSchema, {
-            x: normalized.x,
-            y: normalized.y,
-            z: normalized.z,
-          })
-
-          // PTZSpeed を作成
-          const speed = create(PTZSpeedSchema, {
-            panSpeed: clamp(target.panSpeed, 0.0, 1.0),
-            tiltSpeed: clamp(target.tiltSpeed, 0.0, 1.0),
-            zoomSpeed: clamp(target.zoomSpeed, 0.0, 1.0),
-          })
-
-          // AbsoluteMoveCommand を作成
-          const absoluteMove = create(AbsoluteMoveCommandSchema, {
-            position,
-            speed,
-          })
-
-          // PTZCommand を作成
-          const ptzCommand = create(PTZCommandSchema, {
-            operationType: PTZOperationType.PTZ_OPERATION_TYPE_ABSOLUTE_MOVE,
-            command: {
-              case: "absoluteMove",
-              value: absoluteMove,
+          await sendCommand({
+            message: {
+              case: "command",
+              value: command,
             },
-          })
-
-          // SendPTZCommandRequest を送信
-          await sendPTZCommandMutation({
-            cameraId,
-            command: ptzCommand,
-            sourceId: "ep-ui",
           })
         } catch (e) {
           console.error("Failed to send PTZ absolute", e)
         }
       })()
     },
-    [cameraId, sendPTZCommandMutation, normalizePTZ]
+    [cameraId, sendCommand]
   )
   // 増分制御のステップとレンジ
   const PAN_STEP = 10 // degrees
@@ -308,7 +273,6 @@ export default function CameraPage() {
   const nudgePan = useCallback(
     (dir: 1 | -1) => {
       setPTZ((prev) => {
-        const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
         const nextPan = clamp(prev.pan + dir * PAN_STEP, RANGE.panMin, RANGE.panMax)
         const target = {
           pan: nextPan,
@@ -328,7 +292,6 @@ export default function CameraPage() {
   const nudgeTilt = useCallback(
     (dir: 1 | -1) => {
       setPTZ((prev) => {
-        const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
         const nextTilt = clamp(prev.tilt + dir * TILT_STEP, RANGE.tiltMin, RANGE.tiltMax)
         const target = {
           pan: prev.pan,
@@ -348,7 +311,6 @@ export default function CameraPage() {
   const nudgeZoom = useCallback(
     (dir: 1 | -1) => {
       setPTZ((prev) => {
-        const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
         const nextZoom = clamp(prev.zoom + dir * ZOOM_STEP, RANGE.zoomMin, RANGE.zoomMax)
         const target = {
           pan: prev.pan,
@@ -526,7 +488,7 @@ export default function CameraPage() {
             position: "relative",
           }}
         >
-          <WebRTCPlayer name={cameraName} />
+          <WebRTCPlayer name={streamName} />
 
           {/* LIVE バッジ */}
           <Box
