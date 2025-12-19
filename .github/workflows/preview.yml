@@ -22,7 +22,7 @@ jobs:
     outputs:
       url: ${{ steps.page.outputs.deployment-url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: shiron-dev/actions/setup-node@9e2029b6bf55740748a5eace94dc93d97a1496ba # v1.5.2
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
