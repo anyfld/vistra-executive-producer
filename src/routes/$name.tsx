@@ -149,79 +149,47 @@ export default function CameraPage() {
   const navigate = useNavigate()
   const [mode] = useState<Mode>("Autonomous")
 
-  const {
-    mutateAsync: sendCommand,
-    isPending: sending,
-  } = useMutation(FDService.method.streamControlCommands)
+  const { mutateAsync: sendCommand, isPending: sending } = useMutation(
+    FDService.method.streamControlCommands
+  )
 
   const pressTimerRef = useRef<number | null>(null)
   const repeatIntervalRef = useRef<number | null>(null)
 
-  const genId = () =>
-    (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2))
+  const genId = () => globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
 
-  const sendPTZRelative = useCallback(async (delta: Partial<PTZParameters>) => {
-    if (!name) return
-    const command = {
-      commandId: genId(),
-      cameraId: name,
-      type: ControlCommandType.PTZ_RELATIVE,
-      ptzParameters: {
-        pan: delta.pan ?? 0,
-        tilt: delta.tilt ?? 0,
-        zoom: delta.zoom ?? 0,
-        panSpeed: delta.panSpeed ?? 0.6,
-        tiltSpeed: delta.tiltSpeed ?? 0.6,
-        zoomSpeed: delta.zoomSpeed ?? 0.6,
-      },
-      presetNumber: 0,
-      focusValue: 0,
-      timeoutMs: 2000,
-    }
-    try {
-      await sendCommand({ 
-        message: { 
-          case: "command",
-          value: command 
-        } 
-      })
-    } catch (e) {
-      // TODO: surface error to UI if needed
-      // eslint-disable-next-line no-console
-      console.error("Failed to send PTZ command", e)
-    }
-  }, [name, sendCommand])
-
-  const sendPTZContinuous = useCallback(async (velocity: Partial<PTZParameters>) => {
-    if (!name) return
-    const command = {
-      commandId: genId(),
-      cameraId: name,
-      type: ControlCommandType.PTZ_CONTINUOUS,
-      ptzParameters: {
-        pan: 0,
-        tilt: 0,
-        zoom: 0,
-        panSpeed: velocity.panSpeed ?? 0,
-        tiltSpeed: velocity.tiltSpeed ?? 0,
-        zoomSpeed: velocity.zoomSpeed ?? 0,
-      },
-      presetNumber: 0,
-      focusValue: 0,
-      timeoutMs: 3000,
-    }
-    try {
-      await sendCommand({
-        message: {
-          case: "command",
-          value: command,
+  const sendPTZContinuous = useCallback(
+    async (velocity: Partial<PTZParameters>) => {
+      if (!name) return
+      const command = {
+        commandId: genId(),
+        cameraId: name,
+        type: ControlCommandType.PTZ_CONTINUOUS,
+        ptzParameters: {
+          pan: 0,
+          tilt: 0,
+          zoom: 0,
+          panSpeed: velocity.panSpeed ?? 0,
+          tiltSpeed: velocity.tiltSpeed ?? 0,
+          zoomSpeed: velocity.zoomSpeed ?? 0,
         },
-      })
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to send PTZ continuous", e)
-    }
-  }, [name, sendCommand])
+        presetNumber: 0,
+        focusValue: 0,
+        timeoutMs: 3000,
+      }
+      try {
+        await sendCommand({
+          message: {
+            case: "command",
+            value: command,
+          },
+        })
+      } catch (e) {
+        console.error("Failed to send PTZ continuous", e)
+      }
+    },
+    [name, sendCommand]
+  )
 
   const sendPTZStop = useCallback(async () => {
     if (!name) return
@@ -249,32 +217,34 @@ export default function CameraPage() {
         },
       })
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error("Failed to send PTZ stop", e)
     }
   }, [name, sendCommand])
 
-  const handlePressStart = useCallback((delta: Partial<PTZParameters>) => {
-    // 長押し開始: 連続移動の開始を一度だけ送信
-    // 方向は速度の符号で表現
-    sendPTZContinuous({
-      panSpeed: delta.panSpeed,
-      tiltSpeed: delta.tiltSpeed,
-      zoomSpeed: delta.zoomSpeed,
-    })
+  const handlePressStart = useCallback(
+    (delta: Partial<PTZParameters>) => {
+      // 長押し開始: 連続移動の開始を一度だけ送信
+      // 方向は速度の符号で表現
+      sendPTZContinuous({
+        panSpeed: delta.panSpeed,
+        tiltSpeed: delta.tiltSpeed,
+        zoomSpeed: delta.zoomSpeed,
+      })
 
-    // もし端末側が心拍(keep-alive)を必要とするなら、以下の間欠送信を有効化
-    // デフォルトでは送らないが、必要時にはコメントアウト解除
-    // pressTimerRef.current = window.setTimeout(() => {
-    //   repeatIntervalRef.current = window.setInterval(() => {
-    //     sendPTZContinuous({
-    //       panSpeed: delta.panSpeed,
-    //       tiltSpeed: delta.tiltSpeed,
-    //       zoomSpeed: delta.zoomSpeed,
-    //     })
-    //   }, 1000)
-    // }, 1000)
-  }, [sendPTZContinuous])
+      // もし端末側が心拍(keep-alive)を必要とするなら、以下の間欠送信を有効化
+      // デフォルトでは送らないが、必要時にはコメントアウト解除
+      // pressTimerRef.current = window.setTimeout(() => {
+      //   repeatIntervalRef.current = window.setInterval(() => {
+      //     sendPTZContinuous({
+      //       panSpeed: delta.panSpeed,
+      //       tiltSpeed: delta.tiltSpeed,
+      //       zoomSpeed: delta.zoomSpeed,
+      //     })
+      //   }, 1000)
+      // }, 1000)
+    },
+    [sendPTZContinuous]
+  )
 
   const handlePressEnd = useCallback(() => {
     if (pressTimerRef.current) {

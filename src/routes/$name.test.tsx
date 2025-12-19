@@ -1,9 +1,12 @@
 import { render, screen, fireEvent } from "@testing-library/react"
 import { ThemeProvider } from "@mui/material/styles"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { TransportProvider } from "@connectrpc/connect-query"
 import { describe, it, expect, vi } from "vitest"
 import { useParams, useNavigate } from "react-router-dom"
 
 import { theme } from "@/theme"
+import { transport } from "@/lib/connect"
 import CameraPage from "./$name"
 
 vi.mock("react-router-dom", () => ({
@@ -24,15 +27,26 @@ const mockedUseNavigate = useNavigate as unknown as {
 }
 
 describe("DetailPage", () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  })
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      <TransportProvider transport={transport}>
+        <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      </TransportProvider>
+    </QueryClientProvider>
+  )
+
   it("renders camera name from route parameter", () => {
     const cameraName = "camera-1"
     mockedUseParams.mockReturnValue({ name: cameraName })
 
-    render(
-      <ThemeProvider theme={theme}>
-        <CameraPage />
-      </ThemeProvider>
-    )
+    render(<CameraPage />, { wrapper })
 
     // h1要素にカメラ名が表示されていることを確認
     const heading = screen.getByRole("heading", { level: 1 })
@@ -43,11 +57,7 @@ describe("DetailPage", () => {
     const cameraName = "camera-2"
     mockedUseParams.mockReturnValue({ name: cameraName })
 
-    render(
-      <ThemeProvider theme={theme}>
-        <CameraPage />
-      </ThemeProvider>
-    )
+    render(<CameraPage />, { wrapper })
 
     const player = screen.getByTestId("webrtc-player")
     expect(player).toBeInTheDocument()
@@ -58,11 +68,7 @@ describe("DetailPage", () => {
     const cameraName = "camera-3"
     mockedUseParams.mockReturnValue({ name: cameraName })
 
-    render(
-      <ThemeProvider theme={theme}>
-        <CameraPage />
-      </ThemeProvider>
-    )
+    render(<CameraPage />, { wrapper })
 
     // モードチップが表示されていることを確認
     expect(screen.getByText("Autonomous")).toBeInTheDocument()
@@ -75,11 +81,7 @@ describe("DetailPage", () => {
     mockedUseParams.mockReturnValue({ name: cameraName })
     mockedUseNavigate.mockReturnValue(navigateMock)
 
-    render(
-      <ThemeProvider theme={theme}>
-        <CameraPage />
-      </ThemeProvider>
-    )
+    render(<CameraPage />, { wrapper })
 
     // 最初の IconButton が戻るボタン
     const buttons = screen.getAllByRole("button")
