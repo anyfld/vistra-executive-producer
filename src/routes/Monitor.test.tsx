@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { ThemeProvider } from "@mui/material/styles"
 import { describe, it, expect, vi, beforeEach } from "vitest"
@@ -68,7 +68,12 @@ describe("Monitor", () => {
 
     renderWithTheme()
 
-    expect(await screen.findByText(/No streams available/i)).toBeInTheDocument()
+    await waitFor(
+      async () => {
+        expect(await screen.findByText(/利用可能なストリームがありません/i)).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
   })
 
   it("取得したカメラ情報がグリッドに表示される", async () => {

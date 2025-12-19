@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { ThemeProvider } from "@mui/material/styles"
 import { describe, it, expect } from "vitest"
 
@@ -16,7 +16,7 @@ describe("Chat", () => {
   it("初期表示でヘッダーと空状態メッセージが表示される", () => {
     renderWithTheme()
 
-    expect(screen.getByRole("heading", { name: "LLM チャット" })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "AI Assistant" })).toBeInTheDocument()
     expect(
       screen.getByText(
         /まだメッセージはありません。下部の入力欄から最初のメッセージを送信してみてください。/i
@@ -30,9 +30,7 @@ describe("Chat", () => {
   it("メッセージを入力して送信ボタンを押すとユーザーメッセージとアシスタントの応答が表示される", async () => {
     renderWithTheme()
 
-    const input = screen.getByPlaceholderText(
-      "メッセージを入力して Enter で送信（Shift + Enter で改行）"
-    )
+    const input = screen.getByPlaceholderText("メッセージを入力... (Enterで送信)")
 
     fireEvent.change(input, { target: { value: "こんにちは" } })
 
@@ -42,11 +40,14 @@ describe("Chat", () => {
     fireEvent.click(sendButton)
 
     // ユーザーのメッセージが表示される
-    expect(screen.getByText("あなた")).toBeInTheDocument()
-    expect(screen.getByText("こんにちは")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText("こんにちは")).toBeInTheDocument()
+    })
 
     // ローディングインジケーターが表示される
-    expect(screen.getByText("アシスタントが考え中です…")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText("考え中...")).toBeInTheDocument()
+    })
 
     // モックのアシスタント応答が表示されるまで待つ
     expect(
@@ -54,30 +55,28 @@ describe("Chat", () => {
         timeout: 2000,
       })
     ).toBeInTheDocument()
-
-    // アシスタントのバッジも表示されていること
-    expect(screen.getByText("アシスタント")).toBeInTheDocument()
   })
 
   it("Enter キーでメッセージを送信できる（Shift + Enter では送信されない）", async () => {
     renderWithTheme()
 
-    const input = screen.getByPlaceholderText(
-      "メッセージを入力して Enter で送信（Shift + Enter で改行）"
-    )
+    const input = screen.getByPlaceholderText("メッセージを入力... (Enterで送信)")
 
     // Shift + Enter では送信されない（メッセージバブルが生成されない）
     fireEvent.change(input, { target: { value: "テストメッセージ" } })
     fireEvent.keyDown(input, { key: "Enter", code: "Enter", shiftKey: true })
 
-    // 入力欄には値が残っていてよいので、ユーザー用ラベル「あなた」がまだ表示されていないことを確認
-    expect(screen.queryByText("あなた")).not.toBeInTheDocument()
+    // 少し待ってから、メッセージバブルがまだ表示されていないことを確認
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    // 空状態メッセージがまだ表示されていることを確認（メッセージが送信されていない）
+    expect(screen.getByText(/まだメッセージはありません。/i)).toBeInTheDocument()
 
     // Enter 単体で送信される
     fireEvent.keyDown(input, { key: "Enter", code: "Enter" })
 
-    expect(screen.getByText("あなた")).toBeInTheDocument()
-    expect(screen.getByText("テストメッセージ")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText("テストメッセージ")).toBeInTheDocument()
+    })
 
     expect(
       await screen.findByText(/ここにLLMからの実際の回答が表示される想定です。/i, undefined, {

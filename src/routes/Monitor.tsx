@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Box, Typography, CircularProgress, Alert, Paper, Button } from "@mui/material"
+import { Box, Typography, CircularProgress, Alert, Paper, Button, alpha, Chip } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
+import GridViewIcon from "@mui/icons-material/GridView"
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 
 import type { Camera } from "@/types/camera"
 import { getStreams } from "@/lib/streams"
 import WebRTCPlayer from "@/components/WebRTCPlayer"
+import { colors } from "@/theme"
 
 export default function Monitor() {
   const [cameras, setCameras] = useState<Camera[]>([])
@@ -54,6 +57,8 @@ export default function Monitor() {
     navigate("/")
   }
 
+  const onlineCameras = cameras.filter((c) => c.connection === "Reachable").length
+
   return (
     <Box
       sx={{
@@ -61,129 +66,250 @@ export default function Monitor() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         gap: 2,
+        p: 2,
+        backgroundColor: colors.background.default,
       }}
     >
+      {/* ヘッダー */}
       <Box
         sx={{
-          width: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           px: 1,
+          py: 1,
         }}
       >
         <Button
           variant="outlined"
-          color="inherit"
+          color="primary"
+          size="large"
           startIcon={<ArrowBackIcon />}
           onClick={handleBackToHome}
+          sx={{
+            borderWidth: 2,
+            px: 3,
+            py: 1,
+            "&:hover": {
+              borderWidth: 2,
+            },
+          }}
         >
           Back to Dashboard
         </Button>
-        <Typography variant="h5" component="h1">
-          Monitor View
-        </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+          <Chip
+            icon={<FiberManualRecordIcon sx={{ fontSize: 10 }} />}
+            label={`${onlineCameras} / ${cameras.length} Online`}
+            sx={{
+              backgroundColor: alpha(colors.success.main, 0.15),
+              color: colors.success.light,
+              border: `1px solid ${alpha(colors.success.main, 0.3)}`,
+              fontWeight: 600,
+              "& .MuiChip-icon": {
+                color: colors.success.main,
+                animation: "pulse 2s infinite",
+              },
+              "@keyframes pulse": {
+                "0%, 100%": { opacity: 1 },
+                "50%": { opacity: 0.4 },
+              },
+            }}
+          />
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <GridViewIcon sx={{ color: colors.primary.main, fontSize: 28 }} />
+            <Typography
+              variant="h5"
+              component="h1"
+              sx={{
+                fontWeight: 700,
+                background: `linear-gradient(135deg, ${colors.primary.light} 0%, ${colors.primary.main} 100%)`,
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Monitor View
+            </Typography>
+          </Box>
+        </Box>
       </Box>
+
+      {/* ローディング */}
       {isLoading && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+            gap: 2,
+          }}
+        >
+          <CircularProgress size={48} />
+          <Typography variant="body2" color="text.secondary">
+            ストリームを読み込み中...
+          </Typography>
         </Box>
       )}
 
+      {/* エラー */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mx: 1 }}>
           {error}
         </Alert>
       )}
 
+      {/* 空状態 */}
       {!isLoading && !error && cameras.length === 0 && (
-        <Alert severity="info">No streams available</Alert>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+          }}
+        >
+          <Alert severity="info">利用可能なストリームがありません</Alert>
+        </Box>
       )}
 
+      {/* カメラグリッド */}
       <Box
         sx={{
-          width: "100%",
+          flex: 1,
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
             md: `repeat(${columnCount}, 1fr)`,
           },
-          gap: 0.5,
-          alignItems: "center",
-          justifyContent: "center",
+          gap: 1,
+          alignContent: "start",
         }}
       >
-        {cameras.map((camera) => (
-          <Paper
-            key={camera.name}
-            elevation={0}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              borderRadius: 1,
-              border: 1,
-              borderColor: "grey.400",
-            }}
-          >
-            <Box
+        {cameras.map((camera) => {
+          const isOnline = camera.connection === "Reachable"
+          return (
+            <Paper
+              key={camera.name}
+              elevation={0}
               sx={{
-                position: "relative",
-                width: "100%",
-                pt: "56.25%", // 16:9
-                backgroundColor: "black",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                borderRadius: 2,
+                border: `1px solid ${alpha("#fff", 0.08)}`,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  borderColor: alpha(colors.primary.main, 0.4),
+                  boxShadow: `0 0 24px ${alpha(colors.primary.main, 0.15)}`,
+                },
               }}
             >
               <Box
                 sx={{
-                  position: "absolute",
-                  inset: 0,
+                  position: "relative",
+                  width: "100%",
+                  pt: "56.25%", // 16:9
+                  backgroundColor: "#000",
                 }}
               >
-                <WebRTCPlayer name={camera.name} />
-              </Box>
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: 8,
-                  top: 8,
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1,
-                  backgroundColor: "rgba(0, 0, 0, 0.6)",
-                  maxWidth: "80%",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  color="common.white"
-                  noWrap
-                  aria-label={`Camera ${camera.name}`}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                  }}
                 >
-                  {camera.name}
-                </Typography>
+                  <WebRTCPlayer name={camera.name} />
+                </Box>
+
+                {/* カメラ名オーバーレイ */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    px: 1.5,
+                    py: 1,
+                    background: `linear-gradient(180deg, ${alpha("#000", 0.7)} 0%, transparent 100%)`,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "#fff",
+                      fontWeight: 600,
+                      letterSpacing: "0.02em",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                    }}
+                    aria-label={`Camera ${camera.name}`}
+                  >
+                    {camera.name}
+                  </Typography>
+
+                  {/* ステータスドット */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        backgroundColor: isOnline ? colors.success.main : colors.error.main,
+                        boxShadow: `0 0 8px ${isOnline ? colors.success.main : colors.error.main}`,
+                        animation: isOnline ? "pulse 2s infinite" : "none",
+                        "@keyframes pulse": {
+                          "0%, 100%": { opacity: 1 },
+                          "50%": { opacity: 0.5 },
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                {/* 接続タイプ */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    right: 8,
+                    bottom: 8,
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    backgroundColor: alpha("#000", 0.7),
+                    backdropFilter: "blur(4px)",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: colors.text.secondary,
+                      fontSize: "0.65rem",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {camera.connection}
+                  </Typography>
+                </Box>
               </Box>
-              <Box
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  bottom: 8,
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1,
-                  backgroundColor: "rgba(0, 0, 0, 0.6)",
-                }}
-              >
-                <Typography variant="caption" color="common.white">
-                  {camera.connection}
-                </Typography>
-              </Box>
-            </Box>
-          </Paper>
-        ))}
+            </Paper>
+          )
+        })}
       </Box>
     </Box>
   )
