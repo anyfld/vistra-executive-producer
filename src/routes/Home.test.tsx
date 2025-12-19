@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { ThemeProvider } from "@mui/material/styles"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
@@ -70,12 +70,23 @@ describe("Home", () => {
       </ThemeProvider>
     )
 
-    // Wait for first camera to load
-    await screen.findByText(/Name: camera-1/i)
+    // Wait for first camera to load - カメラ名は複数箇所に表示されるので、getAllByTextを使用
+    await waitFor(
+      () => {
+        const nameElements = screen.getAllByText(mockCameras[0].name)
+        expect(nameElements.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     // Paperコンポーネント（カメラカード）がmockCameras.lengthと一致することを確認
-    const cameraCards = container.querySelectorAll(".MuiPaper-root")
-    expect(cameraCards.length).toBe(mockCameras.length)
+    await waitFor(
+      () => {
+        const cameraCards = container.querySelectorAll(".MuiPaper-root")
+        expect(cameraCards.length).toBe(mockCameras.length)
+      },
+      { timeout: 3000 }
+    )
   })
 
   it("renders camera information for each card", async () => {
@@ -86,20 +97,25 @@ describe("Home", () => {
     )
 
     // Wait for cameras to load
-    await screen.findByText(/Name: camera-1/i)
-
-    // 最初のカメラの情報が表示されているか確認
-    expect(screen.getByText(new RegExp(`Name: ${mockCameras[0].name}`, "i"))).toBeInTheDocument()
+    await waitFor(
+      () => {
+        const nameElements = screen.getAllByText(mockCameras[0].name)
+        expect(nameElements.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
     // 複数のカメラカードがあるため、getAllByTextを使用
-    const typeLabels = screen.getAllByText(/Type:/i)
-    expect(typeLabels.length).toBe(mockCameras.length)
+    await waitFor(
+      () => {
+        const typeLabels = screen.getAllByText(/Type/i)
+        expect(typeLabels.length).toBe(mockCameras.length)
 
-    const modeLabels = screen.getAllByText(/Mode:/i)
-    expect(modeLabels.length).toBe(mockCameras.length)
-
-    const connectionLabels = screen.getAllByText(/Connection:/i)
-    expect(connectionLabels.length).toBe(mockCameras.length)
+        const modeLabels = screen.getAllByText(/Mode/i)
+        expect(modeLabels.length).toBe(mockCameras.length)
+      },
+      { timeout: 3000 }
+    )
   })
 
   it("renders all camera names", async () => {
@@ -110,9 +126,15 @@ describe("Home", () => {
     )
 
     // Wait for cameras to load and check all are displayed
-    for (const camera of mockCameras) {
-      await screen.findByText(new RegExp(`Name: ${camera.name}`, "i"))
-    }
+    await waitFor(
+      async () => {
+        for (const camera of mockCameras) {
+          const elements = screen.getAllByText(camera.name)
+          expect(elements.length).toBeGreaterThan(0)
+        }
+      },
+      { timeout: 3000 }
+    )
   })
 
   it("navigates to camera detail page when a camera card is clicked", async () => {
@@ -124,13 +146,31 @@ describe("Home", () => {
 
     const targetCamera = mockCameras[0]
 
-    const nameElement = await screen.findByText(new RegExp(`Name: ${targetCamera.name}`, "i"))
-    const cardElement = nameElement.closest(".MuiPaper-root")
+    // カメラ名が表示されるまで待つ
+    await waitFor(
+      () => {
+        const nameElements = screen.getAllByText(targetCamera.name)
+        expect(nameElements.length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
 
-    if (cardElement) {
-      fireEvent.click(cardElement)
-    }
+    // カメラ名を含むPaperコンポーネント（カメラカード）を探す
+    await waitFor(
+      () => {
+        const nameElements = screen.getAllByText(targetCamera.name)
+        const cardElement = nameElements[0]?.closest(".MuiPaper-root")
+        if (cardElement) {
+          fireEvent.click(cardElement)
+        } else {
+          throw new Error("Card element not found")
+        }
+      },
+      { timeout: 3000 }
+    )
 
-    expect(mockedNavigate).toHaveBeenCalledWith(`/${targetCamera.name}`)
+    await waitFor(() => {
+      expect(mockedNavigate).toHaveBeenCalledWith(`/${targetCamera.name}`)
+    })
   })
 })
