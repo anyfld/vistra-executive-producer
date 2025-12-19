@@ -297,15 +297,24 @@ export default function Home() {
             <strong>エラー:</strong> {error instanceof Error ? error.message : String(error)}
           </Typography>
           <Typography variant="body2" sx={{ fontSize: "0.875rem", mb: 1 }}>
-            <strong>API Base URL:</strong> {import.meta.env.VITE_API_BASE_URL || "http://localhost:8080 (default)"}
+            <strong>API Base URL:</strong>{" "}
+            {import.meta.env.VITE_API_BASE_URL || "http://localhost:8080 (default)"}
           </Typography>
           <Typography variant="body2" sx={{ fontSize: "0.875rem", mb: 1 }}>
-            <strong>開発モード:</strong> {import.meta.env.DEV ? "はい（Viteプロキシ使用）" : "いいえ"}
+            <strong>開発モード:</strong>{" "}
+            {import.meta.env.DEV ? "はい（Viteプロキシ使用）" : "いいえ"}
           </Typography>
-          <Typography variant="caption" component="div" sx={{ fontSize: "0.75rem", mt: 1, opacity: 0.7 }}>
+          <Typography
+            variant="caption"
+            component="div"
+            sx={{ fontSize: "0.75rem", mt: 1, opacity: 0.7 }}
+          >
             <strong>トラブルシューティング:</strong>
             <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
-              <li>バックエンドAPIサーバーが起動しているか確認してください（デフォルト: http://localhost:1984）</li>
+              <li>
+                バックエンドAPIサーバーが起動しているか確認してください（デフォルト:
+                http://localhost:1984）
+              </li>
               <li>ブラウザの開発者ツールのネットワークタブでリクエストを確認してください</li>
               <li>CORS設定が正しいか確認してください</li>
             </ul>

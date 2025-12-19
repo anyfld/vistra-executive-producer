@@ -1,7 +1,7 @@
 import { parse } from "valibot"
 
 import { StreamsResponseSchema } from "../types/stream"
-import type { Camera } from "@/types/camera.ts"
+import type { Camera } from "@/types/camera"
 
 const dummyData: Camera[] = [
   {

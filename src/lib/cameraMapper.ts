@@ -1,6 +1,9 @@
 import type { Camera } from "@/types/camera"
 import type { Camera as ProtoCamera } from "@/gen/proto/v1/cr_service_pb"
-import { CameraMode as CameraModeEnum, CameraStatus as CameraStatusEnum } from "@/gen/proto/v1/cr_service_pb"
+import {
+  CameraMode as CameraModeEnum,
+  CameraStatus as CameraStatusEnum,
+} from "@/gen/proto/v1/cr_service_pb"
 
 export function mapProtoCamera(protoCamera: ProtoCamera): Camera {
   const mode: Camera["mode"] =
@@ -11,7 +14,8 @@ export function mapProtoCamera(protoCamera: ProtoCamera): Camera {
         : "Autonomous"
 
   const connection: Camera["connection"] =
-    protoCamera.status === CameraStatusEnum.ONLINE || protoCamera.status === CameraStatusEnum.STREAMING
+    protoCamera.status === CameraStatusEnum.ONLINE ||
+    protoCamera.status === CameraStatusEnum.STREAMING
       ? "Reachable"
       : "Unreachable"
 
