@@ -34,3 +34,4 @@ export function mapProtoCameras(cameras?: ProtoCamera[]): Camera[] {
   if (!cameras) return []
   return cameras.map(mapProtoCamera)
 }
+

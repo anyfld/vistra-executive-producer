@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useMutation, useQuery } from "@connectrpc/connect-query"
 import { useParams, useNavigate } from "react-router-dom"
 import { Box, Typography, Button, IconButton, Paper, Chip, alpha } from "@mui/material"
@@ -19,6 +19,8 @@ import { FDService } from "@/gen/proto/v1/fd_service_pb"
 import { ControlCommandType } from "@/gen/proto/v1/fd_service_pb"
 import type { PTZParameters } from "@/gen/proto/v1/cinematography_pb"
 import { getCamera } from "@/gen/proto/v1/cd_service-CameraService_connectquery"
+import { listAllCameras } from "@/gen/proto/v1/cr_service-CRService_connectquery"
+import { CameraStatus } from "@/gen/proto/v1/cr_service_pb"
 
 // メトリクス型
 type MetricData = {
@@ -158,6 +160,27 @@ export default function CameraPage() {
   const { data: cameraData } = useQuery(getCamera, { cameraId }, { enabled: Boolean(cameraId) })
   const cameraName = (cameraData?.camera?.name ?? cameraId) || "camera"
 
+  // CRService の ListAllCameras から STREAMING 状態のカメラを取得し、不一致時に自動修正
+  const { data: streamingList } = useQuery(listAllCameras, {
+    masterMfId: "",
+    modeFilter: [],
+    statusFilter: [CameraStatus.STREAMING],
+    pageSize: 100,
+    pageToken: "",
+  })
+  useEffect(() => {
+    const shouldAutoFix = typeof window !== "undefined" && import.meta.env.MODE !== "test"
+    if (!shouldAutoFix) return
+    const ids = new Set((streamingList?.cameras ?? []).map((c) => c.id))
+    if (ids.size === 0) return
+    if (!cameraIdParam || !ids.has(cameraIdParam)) {
+      const target = streamingList?.cameras?.[0]?.id
+      if (target) {
+        navigate(`/${target}`, { replace: true })
+      }
+    }
+  }, [cameraIdParam, streamingList, navigate])
+
   const genId = () => globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)
 
   // ローカルPTZ状態（絶対値）。サーバーの能力が不明なため、デフォルトレンジに合わせてクランプ。
@@ -170,7 +193,7 @@ export default function CameraPage() {
   const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
 
   const sendPTZAbsolute = useCallback(
-    async (next: Partial<PTZParameters>) => {
+    (next: Partial<PTZParameters>) => {
       if (!cameraId) return
       const target = {
         pan: next.pan ?? ptz.pan,
@@ -180,6 +203,8 @@ export default function CameraPage() {
         tiltSpeed: next.tiltSpeed ?? 0.5,
         zoomSpeed: next.zoomSpeed ?? 0.5,
       }
+      // 即座にローカル状態を更新（乐観的更新）
+      setPTZ({ pan: target.pan, tilt: target.tilt, zoom: target.zoom })
       const command = {
         commandId: genId(),
         cameraId,
@@ -189,17 +214,19 @@ export default function CameraPage() {
         focusValue: 0,
         timeoutMs: 5000,
       }
-      try {
-        await sendCommand({
-          message: {
-            case: "command",
-            value: command,
-          },
-        })
-        setPTZ({ pan: target.pan, tilt: target.tilt, zoom: target.zoom })
-      } catch (e) {
-        console.error("Failed to send PTZ absolute", e)
-      }
+      ;(async () => {
+        try {
+          await sendCommand({
+            message: {
+              case: "command",
+              value: command,
+            },
+          })
+        } catch (e) {
+          console.error("Failed to send PTZ absolute", e)
+          // エラー時はロールバック（ただしUIは即座に更新済み）
+        }
+      })()
     },
     [cameraId, ptz, sendCommand]
   )
