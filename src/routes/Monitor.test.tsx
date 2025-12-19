@@ -55,8 +55,11 @@ describe("Monitor", () => {
     )
 
   it("初期表示でストリーム読み込み中のローディングインジケーターが表示される", async () => {
-
-    mockedUseQuery.mockReturnValue({ data: undefined, isLoading: true, error: null } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue([])
 
     renderWithTheme()
@@ -67,7 +70,11 @@ describe("Monitor", () => {
   it("ストリーム取得に失敗した場合にエラーメッセージが表示される", async () => {
     const errorMessage = "Failed to load streams"
 
-    mockedUseQuery.mockReturnValue({ data: undefined, isLoading: false, error: new Error(errorMessage) } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error(errorMessage),
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue([])
 
     renderWithTheme()
@@ -76,8 +83,11 @@ describe("Monitor", () => {
   })
 
   it("ストリームが空の場合に情報メッセージが表示される", async () => {
-
-    mockedUseQuery.mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: { cameras: [] },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue([])
 
     renderWithTheme()
@@ -91,8 +101,11 @@ describe("Monitor", () => {
   })
 
   it("取得したカメラ情報がグリッドに表示される", async () => {
-
-    mockedUseQuery.mockReturnValue({ data: { cameras: [{} as unknown, {} as unknown] }, isLoading: false, error: null } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: { cameras: [{} as unknown, {} as unknown] },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue(mockCameras)
 
     const { container } = renderWithTheme()

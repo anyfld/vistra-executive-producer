@@ -64,7 +64,11 @@ describe("Home", () => {
   const mockedMapProto = vi.mocked(mapProtoCameras)
 
   it("renders correctly", () => {
-    mockedUseQuery.mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: { cameras: [] },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue(mockCameras)
 
     render(
@@ -85,7 +89,11 @@ describe("Home", () => {
   })
 
   it("renders camera cards", async () => {
-    mockedUseQuery.mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: { cameras: [] },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue(mockCameras)
 
     const { container } = render(
@@ -114,7 +122,11 @@ describe("Home", () => {
   })
 
   it("renders camera information for each card", async () => {
-    mockedUseQuery.mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: { cameras: [] },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue(mockCameras)
 
     render(
@@ -146,7 +158,11 @@ describe("Home", () => {
   })
 
   it("renders all camera names", async () => {
-    mockedUseQuery.mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null } as unknown as ReturnType<typeof useQuery>)
+    mockedUseQuery.mockReturnValue({
+      data: { cameras: [] },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue(mockCameras)
 
     render(
@@ -168,7 +184,11 @@ describe("Home", () => {
   })
 
   it("navigates to camera detail page when a camera card is clicked", async () => {
-    mockedUseQuery.mockReturnValue({ data: { cameras: [] }, isLoading: false, error: null })
+    mockedUseQuery.mockReturnValue({
+      data: { cameras: [] },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useQuery>)
     mockedMapProto.mockReturnValue(mockCameras)
 
     render(
