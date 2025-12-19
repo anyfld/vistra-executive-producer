@@ -39,10 +39,10 @@ importers:
         specifier: ^5.90.12
         version: 5.90.12(react@19.2.3)
       react:
-        specifier: ^19.2.0
+        specifier: ^19.2.3
         version: 19.2.3
       react-dom:
-        specifier: ^19.2.0
+        specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       react-router-dom:
         specifier: ^7.10.1
@@ -73,10 +73,10 @@ importers:
         specifier: 24.10.4
         version: 24.10.4
       '@types/react':
-        specifier: ^19.2.5
+        specifier: 19.2.7
         version: 19.2.7
       '@types/react-dom':
-        specifier: ^19.2.3
+        specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.7)
       '@vitejs/plugin-react':
         specifier: 5.1.2
