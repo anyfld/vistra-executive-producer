@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/service.proto.
  */
 export const file_v1_service: GenFile = /*@__PURE__*/
-  fileDesc("ChB2MS9zZXJ2aWNlLnByb3RvEgJ2MSINCgtQaW5nUmVxdWVzdCIfCgxQaW5nUmVzcG9uc2USDwoHbWVzc2FnZRgBIAEoCTI9Cg5FeGFtcGxlU2VydmljZRIrCgRQaW5nEg8udjEuUGluZ1JlcXVlc3QaEC52MS5QaW5nUmVzcG9uc2UiAEJGWkRnaXRodWIuY29tL2FueWZsZC92aXN0cmEtb3BlcmF0aW9uLWNvbnRyb2wtcm9vbS9nZW4vcHJvdG8vdjE7cHJvdG92MWIGcHJvdG8z");
+  fileDesc("ChB2MS9zZXJ2aWNlLnByb3RvEgJ2MSINCgtQaW5nUmVxdWVzdCIfCgxQaW5nUmVzcG9uc2USDwoHbWVzc2FnZRgBIAEoCSIYChZHZXRHbG9iYWxDb25maWdSZXF1ZXN0IjsKF0dldEdsb2JhbENvbmZpZ1Jlc3BvbnNlEiAKBmNvbmZpZxgBIAEoCzIQLnYxLkdsb2JhbENvbmZpZyIrCgxHbG9iYWxDb25maWcSGwoTd2VicnRjX3VybF90ZW1wbGF0ZRgBIAEoCTI9Cg5FeGFtcGxlU2VydmljZRIrCgRQaW5nEg8udjEuUGluZ1JlcXVlc3QaEC52MS5QaW5nUmVzcG9uc2UiADJdCg1Db25maWdTZXJ2aWNlEkwKD0dldEdsb2JhbENvbmZpZxIaLnYxLkdldEdsb2JhbENvbmZpZ1JlcXVlc3QaGy52MS5HZXRHbG9iYWxDb25maWdSZXNwb25zZSIAQkZaRGdpdGh1Yi5jb20vYW55ZmxkL3Zpc3RyYS1vcGVyYXRpb24tY29udHJvbC1yb29tL2dlbi9wcm90by92MTtwcm90b3YxYgZwcm90bzM");
 
 /**
  * @generated from message v1.PingRequest
@@ -43,6 +43,58 @@ export const PingResponseSchema: GenMessage<PingResponse> = /*@__PURE__*/
   messageDesc(file_v1_service, 1);
 
 /**
+ * @generated from message v1.GetGlobalConfigRequest
+ */
+export type GetGlobalConfigRequest = Message<"v1.GetGlobalConfigRequest"> & {
+};
+
+/**
+ * Describes the message v1.GetGlobalConfigRequest.
+ * Use `create(GetGlobalConfigRequestSchema)` to create a new message.
+ */
+export const GetGlobalConfigRequestSchema: GenMessage<GetGlobalConfigRequest> = /*@__PURE__*/
+  messageDesc(file_v1_service, 2);
+
+/**
+ * @generated from message v1.GetGlobalConfigResponse
+ */
+export type GetGlobalConfigResponse = Message<"v1.GetGlobalConfigResponse"> & {
+  /**
+   * @generated from field: v1.GlobalConfig config = 1;
+   */
+  config?: GlobalConfig;
+};
+
+/**
+ * Describes the message v1.GetGlobalConfigResponse.
+ * Use `create(GetGlobalConfigResponseSchema)` to create a new message.
+ */
+export const GetGlobalConfigResponseSchema: GenMessage<GetGlobalConfigResponse> = /*@__PURE__*/
+  messageDesc(file_v1_service, 3);
+
+/**
+ * グローバル設定
+ *
+ * @generated from message v1.GlobalConfig
+ */
+export type GlobalConfig = Message<"v1.GlobalConfig"> & {
+  /**
+   * WebRTC接続URLテンプレート
+   * プレースホルダー {webrtc_connection_name} を含む
+   *
+   * @generated from field: string webrtc_url_template = 1;
+   */
+  webrtcUrlTemplate: string;
+};
+
+/**
+ * Describes the message v1.GlobalConfig.
+ * Use `create(GlobalConfigSchema)` to create a new message.
+ */
+export const GlobalConfigSchema: GenMessage<GlobalConfig> = /*@__PURE__*/
+  messageDesc(file_v1_service, 4);
+
+/**
  * @generated from service v1.ExampleService
  */
 export const ExampleService: GenService<{
@@ -56,4 +108,21 @@ export const ExampleService: GenService<{
   },
 }> = /*@__PURE__*/
   serviceDesc(file_v1_service, 0);
+
+/**
+ * @generated from service v1.ConfigService
+ */
+export const ConfigService: GenService<{
+  /**
+   * グローバル設定取得
+   *
+   * @generated from rpc v1.ConfigService.GetGlobalConfig
+   */
+  getGlobalConfig: {
+    methodKind: "unary";
+    input: typeof GetGlobalConfigRequestSchema;
+    output: typeof GetGlobalConfigResponseSchema;
+  },
+}> = /*@__PURE__*/
+  serviceDesc(file_v1_service, 1);
 

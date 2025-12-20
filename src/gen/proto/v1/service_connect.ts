@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { PingRequest, PingResponse } from "./service_pb.js";
+import { GetGlobalConfigRequest, GetGlobalConfigResponse, PingRequest, PingResponse } from "./service_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -19,6 +19,26 @@ export const ExampleService = {
       name: "Ping",
       I: PingRequest,
       O: PingResponse,
+      kind: MethodKind.Unary,
+    },
+  }
+} as const;
+
+/**
+ * @generated from service v1.ConfigService
+ */
+export const ConfigService = {
+  typeName: "v1.ConfigService",
+  methods: {
+    /**
+     * グローバル設定取得
+     *
+     * @generated from rpc v1.ConfigService.GetGlobalConfig
+     */
+    getGlobalConfig: {
+      name: "GetGlobalConfig",
+      I: GetGlobalConfigRequest,
+      O: GetGlobalConfigResponse,
       kind: MethodKind.Unary,
     },
   }
