@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type FormEvent } from "react"
+import { useState, useRef, useEffect, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Box,
@@ -16,9 +16,7 @@ import SmartToyIcon from "@mui/icons-material/SmartToy"
 import PersonIcon from "@mui/icons-material/Person"
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
-import { useMutation } from "@connectrpc/connect-query"
 import { colors } from "@/theme"
-import { sendToLLM, receiveFromLLM } from "@/gen/proto/v1/md_service-MDService_connectquery"
 
 export type Role = "user" | "assistant"
 
@@ -28,9 +26,35 @@ export type ChatMessage = {
   content: string
 }
 
-// LLMレスポンスをポーリングする間隔（ミリ秒）
-const POLLING_INTERVAL = 500
-const MAX_POLLING_ATTEMPTS = 60 // 最大30秒待機
+// LLMService APIのベースURL
+const getApiBaseUrl = () => {
+  if (import.meta.env.DEV) {
+    return "" // 開発環境: Viteのプロキシ経由
+  }
+  return import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
+}
+
+// v1.LLMService/Chat を呼び出す関数
+async function chatWithLLM(
+  message: string,
+  signal?: AbortSignal
+): Promise<string> {
+  const response = await fetch(`${getApiBaseUrl()}/v1.LLMService/Chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message }),
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(`LLMリクエストに失敗しました: ${response.status}`)
+  }
+
+  const data = await response.json()
+  return data.message || data.response || data.text || ""
+}
 
 // 再利用可能なチャットコンテンツコンポーネント
 export function ChatContent() {
@@ -39,34 +63,6 @@ export function ChatContent() {
   const [isLoading, setIsLoading] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
-
-  // LLM API mutations
-  const { mutateAsync: sendToLLMAsync } = useMutation(sendToLLM)
-  const { mutateAsync: receiveFromLLMAsync } = useMutation(receiveFromLLM)
-
-  // LLMからのレスポンスをポーリングして取得
-  const pollForResponse = useCallback(
-    async (requestId: string): Promise<string> => {
-      for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
-        // キャンセルチェック
-        if (abortControllerRef.current?.signal.aborted) {
-          throw new Error("リクエストがキャンセルされました")
-        }
-
-        const response = await receiveFromLLMAsync({ requestId })
-
-        if (response.isComplete) {
-          return response.text
-        }
-
-        // レスポンスが完了していない場合は待機してリトライ
-        await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL))
-      }
-
-      throw new Error("LLMからのレスポンスがタイムアウトしました")
-    },
-    [receiveFromLLMAsync]
-  )
 
   const handleSubmit = async () => {
     const trimmed = input.trim()
@@ -86,18 +82,11 @@ export function ChatContent() {
     abortControllerRef.current = new AbortController()
 
     try {
-      // LLMにプロンプトを送信
-      const sendResponse = await sendToLLMAsync({
-        prompt: trimmed,
-        context: undefined,
-      })
-
-      if (!sendResponse.accepted) {
-        throw new Error("LLMリクエストが受け付けられませんでした")
-      }
-
-      // レスポンスをポーリング
-      const assistantText = await pollForResponse(sendResponse.requestId)
+      // v1.LLMService/Chat を呼び出し
+      const assistantText = await chatWithLLM(
+        trimmed,
+        abortControllerRef.current.signal
+      )
 
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -106,6 +95,10 @@ export function ChatContent() {
       }
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
+      // AbortErrorは無視
+      if (error instanceof Error && error.name === "AbortError") {
+        return
+      }
       console.error("チャットリクエストの処理中にエラーが発生しました:", error)
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
