@@ -26,13 +26,31 @@ export type ChatMessage = {
   content: string
 }
 
-function createMockAssistantReply(userMessage: string): string {
-  // 実際のLLM連携部分はここを差し替える想定
-  if (!userMessage.trim()) {
-    return "何か質問や相談があれば、テキストボックスに入力して送信してください。"
+// LLMService APIのベースURL
+const getApiBaseUrl = () => {
+  if (import.meta.env.DEV) {
+    return "" // 開発環境: Viteのプロキシ経由
+  }
+  return import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
+}
+
+// v1.LLMService/Chat を呼び出す関数
+async function chatWithLLM(message: string, signal?: AbortSignal): Promise<string> {
+  const response = await fetch(`${getApiBaseUrl()}/v1.LLMService/Chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message }),
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(`LLMリクエストに失敗しました: ${response.status}`)
   }
 
-  return `（モック応答）\n\nあなたのメッセージ:\n「${userMessage}」\n\nここにLLMからの実際の回答が表示される想定です。`
+  const data = await response.json()
+  return data.message || data.response || data.text || ""
 }
 
 // 再利用可能なチャットコンテンツコンポーネント
@@ -41,6 +59,7 @@ export function ChatContent() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const handleSubmit = async () => {
     const trimmed = input.trim()
@@ -56,16 +75,13 @@ export function ChatContent() {
     setInput("")
     setIsLoading(true)
 
-    // 実際のLLM API呼び出しに差し替えるポイント
-    const simulateRequest = () =>
-      new Promise<string>((resolve) => {
-        window.setTimeout(() => {
-          resolve(createMockAssistantReply(trimmed))
-        }, 800)
-      })
+    // 新しいリクエスト用のAbortControllerを作成
+    abortControllerRef.current = new AbortController()
 
     try {
-      const assistantText = await simulateRequest()
+      // v1.LLMService/Chat を呼び出し
+      const assistantText = await chatWithLLM(trimmed, abortControllerRef.current.signal)
+
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -73,17 +89,32 @@ export function ChatContent() {
       }
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
+      // AbortErrorは無視
+      if (error instanceof Error && error.name === "AbortError") {
+        return
+      }
       console.error("チャットリクエストの処理中にエラーが発生しました:", error)
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "申し訳ございません。エラーが発生しました。もう一度お試しください。",
+        content:
+          error instanceof Error
+            ? `申し訳ございません。エラーが発生しました: ${error.message}`
+            : "申し訳ございません。エラーが発生しました。もう一度お試しください。",
       }
       setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+      abortControllerRef.current = null
     }
   }
+
+  // コンポーネントアンマウント時にリクエストをキャンセル
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [])
 
   useEffect(() => {
     const el = scrollContainerRef.current
